@@ -105,6 +105,7 @@ def getIP(ifaces=['wlan0', 'eth0']):
 
 def main():
     import sys
+    print('hello')
     if len(sys.argv) >= 2:
         print("Welcome to SunFounder PiCar-4WD.")
         command = sys.argv[1]
@@ -133,8 +134,8 @@ def main():
             if len(sys.argv) >= 3:
                 opt = sys.argv[2]
                 if opt == "motor":
-                    print("Motor test start!, Ctrl+C to Stop")
-                    forward(50)
+                    print("Motor test start!, Ctrl+C to Stopp")
+                    forward(.5)
                     try:
                         while True:
                             pass
@@ -144,6 +145,7 @@ def main():
                         stop()
                         time.sleep(0.1)
                 elif opt == "servo":
+                    print("servo")
                     print(get_distance_at(0))
                 elif opt == "grayscale":
                     print(get_grayscale_list())
@@ -155,6 +157,7 @@ def main():
     else:
         usage()
     destroy()
+
 
 # def main():
 #     try:
@@ -197,4 +200,6 @@ Options:
     elif cmd == "test":
         print(test)
     destroy()
-        
+
+if __name__ == "__main__":
+    main()

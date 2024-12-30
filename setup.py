@@ -8,7 +8,6 @@ from os import listdir
 import sys
 import time
 import threading
-
 if geteuid() != 0:
     print("Script must be run as root. Try 'sudo python3 setup.y install'")
     sys.exit(1)

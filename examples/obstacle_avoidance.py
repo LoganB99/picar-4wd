@@ -1,6 +1,6 @@
 import picar_4wd as fc
 
-speed = 30
+speed = 10
 
 def main():
     while True:
