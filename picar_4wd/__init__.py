@@ -214,6 +214,14 @@ def set_motor_power(motor, power):
 def speed_val():
     return (left_rear_speed() + right_rear_speed()) / 2.0
 
+def get_current_angle():
+    return current_angle
+
+def hello():
+    print("hello")
+
+
+
 ######################################################## 
 if __name__ == '__main__':
     start_speed_thread()
