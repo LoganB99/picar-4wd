@@ -10,7 +10,8 @@ def main():
         # time.sleep(0.5)
         # fc.servo.set_angle(-90)
         # time.sleep(0.5)
-        print(fc.get_distance_at(0))
+        scan = fc.scan_step(35)
+        print(scan)
         # print(fc.get_current_angle())
         # fc.hello()
         
