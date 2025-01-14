@@ -16,6 +16,7 @@ class Servo():
         self.pin.prescaler(prescaler)
 
     def set_angle(self, angle):
+        # Changed angle direction: positive is right, negative is left
         try:
             angle = int(angle)
         except:
@@ -24,7 +25,7 @@ class Servo():
             angle = -90
         if angle > 90:
             angle = 90
-        angle = angle + self.offset
+        angle = -angle + self.offset # Negating angle to reverse direction
         High_level_time = mapping(angle, -90, 90, self.MIN_PW, self.MAX_PW)
         pwr =  High_level_time / 20000
         value = int(pwr*self.PERIOD)
