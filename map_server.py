@@ -17,7 +17,7 @@ CAR_START_X = MAP_WIDTH // 2  # Car starts at middle bottom
 CAR_START_Y = 0
 
 # Point connection parameters
-MAX_POINT_DISTANCE = 10  # Maximum distance in cm to connect points
+MAX_POINT_DISTANCE = 10 # Maximum distance in cm to connect points
 
 # Visualization parameters
 PLOT_WIDTH = 10
