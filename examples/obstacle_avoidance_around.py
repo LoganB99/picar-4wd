@@ -64,7 +64,13 @@ def main():
             
             right_time = turn_for_path(fc.turn_right, 4)
             if right_time != -1:
-                continue
+                fc.forward(SPEED)
+                time.sleep(right_time*.5)
+                fc.stop()
+                fc.turn_left(SPEED)
+                time.sleep(right_time*.5)
+                fc.stop()
+
             else:
                 break
         else:

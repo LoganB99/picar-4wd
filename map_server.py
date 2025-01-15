@@ -31,6 +31,10 @@ fig = plt.figure(figsize=(PLOT_WIDTH, PLOT_HEIGHT))
 # Add mutex lock for thread safety
 map_lock = threading.Lock()
 
+# Car position tracking
+car_x = CAR_START_X
+car_y = CAR_START_Y
+
 def init_visualization():
     pass
 
@@ -40,10 +44,10 @@ def get_xy_coords(angle, distance):
     # Get x,y relative to car position
     x = distance * math.sin(angle_rad)
     y = distance * math.cos(angle_rad)
-    # Convert to map coordinates (car at CAR_START_X,CAR_START_Y)
-    map_x = int(CAR_START_X + x)
+    # Convert to map coordinates (car at current position)
+    map_x = int(car_x + x)
     # Y coordinate starts from bottom now
-    map_y = int(y)
+    map_y = int(car_y + y)
     return (map_x, map_y)
 
 def connect_points(map_array, x1, y1, x2, y2):
@@ -92,7 +96,7 @@ def update_visualization():
         plt.grid(True, linestyle='--', alpha=0.7)
         plt.axhline(y=CAR_START_Y, color='r', linestyle='-', alpha=0.5)
         plt.axvline(x=CAR_START_X, color='r', linestyle='-', alpha=0.5)
-        plt.plot(CAR_START_X, CAR_START_Y, 'r^', markersize=CAR_MARKER_SIZE, label='Car')
+        plt.plot(car_x, car_y, 'r^', markersize=CAR_MARKER_SIZE, label='Car')
         plt.legend()
         
         # Save plot to bytes buffer
@@ -100,6 +104,14 @@ def update_visualization():
         plt.savefig(buf, format='png', bbox_inches='tight')
         buf.seek(0)
         return buf
+
+@app.route('/update_car_position', methods=['POST'])
+def update_car_position():
+    global car_x, car_y
+    data = request.json
+    car_x = data['x']
+    car_y = data['y']
+    return {'status': 'success'}
 
 @app.route('/update_map', methods=['POST'])
 def update_map():
@@ -155,10 +167,12 @@ def get_map():
 
 @app.route('/reset_map', methods=['POST'])
 def reset_map():
-    global map_array
+    global map_array, car_x, car_y
     # Acquire lock before resetting map
     with map_lock:
         map_array = np.zeros((MAP_HEIGHT, MAP_WIDTH))
+        car_x = CAR_START_X
+        car_y = CAR_START_Y
     return {'status': 'success'}
 
 @app.route('/')
