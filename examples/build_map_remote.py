@@ -30,6 +30,25 @@ SERVER_URL = "http://192.168.1.108:5000"
 car_x = CAR_START_X
 car_y = CAR_START_Y
 last_update_time = time.time()
+direction = 'N'  # N, E, S, W
+
+# todo: is south really south, once map updates, make sure we are going right direction
+
+def turn_left_90_deg():
+    global direction
+    print("Turning left 90 degrees")
+    fc.turn_left(SPEED)
+    time.sleep(1)  # Adjust the time based on power_val to achieve a 90-degree turn
+    fc.stop()
+    direction = {'N': 'W', 'W': 'S', 'S': 'E', 'E': 'N'}[direction]
+
+def turn_right_90_deg():
+    global direction
+    print("Turning right 90 degrees")
+    fc.turn_right(SPEED)
+    time.sleep(1)  # Adjust the time based on power_val to achieve a 90-degree turn
+    fc.stop()
+    direction = {'N': 'E', 'E': 'S', 'S': 'W', 'W': 'N'}[direction]
 
 def get_complete_scan():
     """Helper function to get a complete scan"""
@@ -55,29 +74,6 @@ def try_random_unstuck():
         return True
     return False
 
-def turn_for_path(turn_func, max_turn_time=0.25):
-    """Turn until path is clear or we've turned too long
-    Args:
-        turn_func: Turn direction to try (fc.turn_left or fc.turn_right)
-        max_turn_time: Base time for turns
-    Returns:
-        float: Time spent turning in seconds, or -1 if no clear path found
-    """
-    direction = "right" if turn_func == fc.turn_right else "left"
-    print(f"\nAttempting to turn {direction} for up to {max_turn_time} seconds")
-    start_time = time.time()
-    while time.time() - start_time < max_turn_time:
-        turn_func(SPEED)
-        scan_list = get_complete_scan()
-        if check_path_clear(scan_list):
-            turn_time = time.time() - start_time
-            print(f"Found clear path after turning {direction} for {turn_time:.2f} seconds")
-            return turn_time
-    fc.stop()
-    print(f"No clear path found after turning {direction}")
-    scan_data_to_map()
-    return -1
-
 def update_car_position():
     global car_x, car_y, last_update_time
     current_time = time.time()
@@ -89,12 +85,19 @@ def update_car_position():
     # Calculate distance traveled in cm
     distance = speed * elapsed_time
     
-    # Update Y position (assuming forward motion)
-    car_y += distance
+    # Update position based on direction
+    if direction == 'N':
+        car_y += distance
+    elif direction == 'E':
+        car_x += distance
+    elif direction == 'S':
+        car_y -= distance
+    elif direction == 'W':
+        car_x -= distance
     
     last_update_time = current_time
     
-    print(f"Updated position - X: {car_x:.1f}, Y: {car_y:.1f}, Speed: {speed:.1f} cm/s")
+    print(f"Updated position - X: {car_x:.1f}, Y: {car_y:.1f}, Speed: {speed:.1f} cm/s, Direction: {direction}")
     
     # Send position update to server
     try:
@@ -188,20 +191,22 @@ def main():
                 time.sleep(.25)
                 fc.stop()
                 
-                right_time = turn_for_path(fc.turn_right, 4)
-                if right_time != -1:
-                    print("\nExecuting S-curve maneuver")
-                    print("Moving forward")
-                    fc.forward(SPEED)
-                    time.sleep(right_time*.5)
-                    fc.stop()
-                    print("Correcting course left")
-                    fc.turn_left(SPEED)
-                    time.sleep(right_time*.5)
-                    fc.stop()
+                turn_right_90_deg()
+                scan_list = get_complete_scan()
+                if not check_path_clear(scan_list):
+                    turn_left_90_deg()
+                    turn_left_90_deg()
+                    scan_list = get_complete_scan()
+                    if not check_path_clear(scan_list):
+                        turn_right_90_deg()
+                        print("Failed to find clear path - restarting navigation cycle")
+                        break
+                    else:
+                        print("Path clear after turning left twice - moving forward")
+                        fc.forward(SPEED)
                 else:
-                    print("Failed to find clear path - restarting navigation cycle")
-                    break
+                    print("Path clear after turning right - moving forward")
+                    fc.forward(SPEED)
             else:
                 print("Path clear - moving forward")
                 fc.forward(SPEED)

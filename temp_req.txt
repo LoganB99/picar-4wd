@@ -1,0 +1,13 @@
+absl-py==2.1.0
+cffi==1.17.1
+flatbuffers==20181003210633
+numpy==2.0.2
+opencv-contrib-python==4.10.0.84
+opencv-python==4.10.0.84
+picamera==1.13
+protobuf==3.20.3
+pybind11==2.13.6
+pycparser==2.22
+sounddevice==0.5.1
+tflite-runtime==2.14.0
+tflite-support==0.4.4
