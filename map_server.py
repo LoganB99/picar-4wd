@@ -117,46 +117,13 @@ def update_car_position():
 def update_map():
     global map_array
     
-    # Get scan data from request
-    scan_data = request.json
-    print("Received scan data:", scan_data)  # Print the raw data
-    points = []
-
+    # Get map data from request
+    data = request.json
+    
     # Acquire lock before modifying map_array
     with map_lock:
-        # Clear the map first
-        map_array = np.zeros((MAP_HEIGHT, MAP_WIDTH))
-        
-        # Process each scan point
-        for scan in scan_data:
-            angle = scan['angle']
-            distance = scan['distance']
-            print(f"Point - Angle: {angle}°, Distance: {distance}cm")  # Print each point
-            
-            if distance > 0:  # Only record valid measurements
-                # Clear points along the ray until obstacle
-                for d in range(int(distance)):
-                    x, y = get_xy_coords(angle, d)
-                    if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
-                        map_array[y, x] = 0
-                        
-                # Mark the obstacle point
-                x, y = get_xy_coords(angle, distance)
-                if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
-                    points.append((x, y))
-                    map_array[y, x] = 1
-
-        # Connect nearby points
-        for i in range(len(points)):
-            for j in range(i + 1, len(points)):
-                x1, y1 = points[i]
-                x2, y2 = points[j]
-                
-                # Calculate distance between points
-                dist = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
-                
-                if dist <= MAX_POINT_DISTANCE:
-                    connect_points(map_array, x1, y1, x2, y2)
+        # Update map array with received data
+        map_array = np.array(data['map'])
 
     return {'status': 'success'}
 

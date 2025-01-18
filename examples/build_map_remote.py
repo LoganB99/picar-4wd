@@ -35,7 +35,8 @@ direction = 'N'  # N, E, S, W
 
 detect = None
 
-# todo: is south really south, once map updates, make sure we are going right direction
+# Map array for local calculations
+map_array = np.zeros((MAP_HEIGHT, MAP_WIDTH))
 
 def turn_left_90_deg():
     global direction
@@ -113,8 +114,54 @@ def update_car_position():
         print("Failed to send position update to server")
         pass
 
+def get_xy_coords(angle, distance):
+    # Convert angle from degrees to radians for math functions
+    angle_rad = math.radians(angle)
+    # Get x,y relative to car position
+    x = distance * math.sin(angle_rad)
+    y = distance * math.cos(angle_rad)
+    # Convert to map coordinates (car at current position)
+    map_x = int(car_x + x)
+    # Y coordinate starts from bottom now
+    map_y = int(car_y + y)
+    return (map_x, map_y)
+
+def connect_points(map_array, x1, y1, x2, y2):
+    # Get slope between points
+    if x2 - x1 == 0:  # Vertical line
+        slope = float('inf')
+    else:
+        slope = (y2 - y1) / (x2 - x1)
+    
+    # Draw line between points using Bresenham's algorithm
+    dx = abs(x2 - x1)
+    dy = abs(y2 - y1)
+    x, y = x1, y1
+    sx = 1 if x2 > x1 else -1
+    sy = 1 if y2 > y1 else -1
+    
+    if dx > dy:
+        err = dx / 2.0
+        while x != x2:
+            map_array[int(y), int(x)] = 1
+            err -= dy
+            if err < 0:
+                y += sy
+                err += dx
+            x += sx
+    else:
+        err = dy / 2.0
+        while y != y2:
+            map_array[int(y), int(x)] = 1
+            err -= dx
+            if err < 0:
+                x += sx
+                err += dy
+            y += sy
+    map_array[int(y2), int(x2)] = 1
+
 def scan_data_to_map():
-    global car_x, car_y, last_update_time
+    global car_x, car_y, last_update_time, map_array
     
     print("\n--- Starting new environment scan ---")
     
@@ -123,46 +170,72 @@ def scan_data_to_map():
     car_y = CAR_START_Y
     last_update_time = time.time()
     
-    scan_data = []  # Store scan measurements
+    # Clear the map
+    map_array = np.zeros((MAP_HEIGHT, MAP_WIDTH))
+    points = []  # Store processed points for connecting
         
     # Scan left to right and collect points
     print("Scanning left to right...")
     for angle in ANGLES_TO_SCAN:
         distance = fc.get_distance_at(angle)
         if distance > 0:  # Only record valid measurements
-            # print(f"Angle: {angle}°, Distance: {distance}cm")
-            scan_data.append({
-                'angle': angle,
-                'distance': distance,
-            })
-    #reset but do not scan
-    # fc.get_distance_at(ANGLES_TO_SCAN[0])
+            # Clear points along the ray until obstacle
+            for d in range(int(distance)):
+                x, y = get_xy_coords(angle, d)
+                if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
+                    map_array[y, x] = 0
+                    
+            # Mark the obstacle point
+            x, y = get_xy_coords(angle, distance)
+            if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
+                points.append((x, y))
+                map_array[y, x] = 1
+
     # Scan right to left
     print("Scanning right to left...")
-    for angle in reversed(ANGLES_TO_SCAN[:-1]): # Skip last angle since we just scanned it
+    for angle in reversed(ANGLES_TO_SCAN[:-1]):
         distance = fc.get_distance_at(angle)
-        if distance > 0:  # Only record valid measurements
-            # print(f"Angle: {angle}°, Distance: {distance}cm")
-            scan_data.append({
-                'angle': angle,
-                'distance': distance,
-            })
+        if distance > 0:
+            # Process point same as above
+            for d in range(int(distance)):
+                x, y = get_xy_coords(angle, d)
+                if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
+                    map_array[y, x] = 0
+                    
+            x, y = get_xy_coords(angle, distance)
+            if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
+                points.append((x, y))
+                map_array[y, x] = 1
+
+    # Connect nearby points
+    MAX_POINT_DISTANCE = 10  # Maximum distance in cm to connect points
+    for i in range(len(points)):
+        for j in range(i + 1, len(points)):
+            x1, y1 = points[i]
+            x2, y2 = points[j]
+            
+            # Calculate distance between points
+            dist = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+            
+            if dist <= MAX_POINT_DISTANCE:
+                connect_points(map_array, x1, y1, x2, y2)
 
     fc.get_distance_at(0)
-    # Send scan data to server
+    
+    # Send processed map data to server
     try:
         response = requests.post(
             f"{SERVER_URL}/update_map",
-            json=scan_data,
+            json={'map': map_array.tolist()},  # Convert numpy array to list for JSON
             timeout=5
         )
         if response.status_code != 200:
             print(f"Error sending data: {response.status_code}")
         else:
-            print("Successfully sent scan data to server")
+            print("Successfully sent map data to server")
     except requests.exceptions.RequestException as e:
         print(f"Failed to connect to server: {e}")
-        time.sleep(1)  # Wait before retrying
+        time.sleep(1)
 
 def main():
     global detect
