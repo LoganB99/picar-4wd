@@ -37,7 +37,7 @@ if __name__ == '__main__':
   parser.add_argument(
       '-m',
       '--model_file',
-      default='/tmp/mobilenet_v1_1.0_224_quant.tflite',
+      default='/tmp/mobilenet_v1_1.0_224.tflite',
       help='.tflite model to be executed')
   parser.add_argument(
       '-l',
