@@ -1,55 +1,96 @@
-## PiCar-4WD 
-PiCar-4WD 
+# TensorFlow Lite Python object detection example with Raspberry Pi
 
-Quick Links:
+This example uses [TensorFlow Lite](https://tensorflow.org/lite) with Python on
+a Raspberry Pi to perform real-time object detection using images streamed from
+the Pi Camera. It draws a bounding box around each detected object in the camera
+preview (when the object score is above a given threshold).
 
- * [About PiCar-4WD](#about_this_module)
- * [Update](#update)
- * [About SunFounder](#about_sunfounder)
- * [License](#license)
- * [Contact us](#contact_us)
+At the end of this page, there are extra steps to accelerate the example using
+the Coral USB Accelerator to increase inference speed.
 
-<a id="about_this_module"></a>
-### About PiCar-4WD:
+## Set up your hardware
 
+Before you begin, you need to
+[set up your Raspberry Pi](https://projects.raspberrypi.org/en/projects/raspberry-pi-setting-up)
+with Raspberry Pi OS (preferably updated to Buster).
 
+You also need to
+[connect and configure the Pi Camera](https://www.raspberrypi.org/documentation/configuration/camera.md)
+if you use the Pi Camera. This code also works with USB camera connect to the
+Raspberry Pi.
 
-<a id="update"></a>
-### Update:
- - picar-4wd is the 4WD car that is built based on the Raspberry Pi, with the functions, including line following, following, obstacle avoidance, speed testing,  remote control, radar testing and use the web page to control the picar-4wd
-2019-09-21:
- - New Release
+And to see the results from the camera, you need a monitor connected to the
+Raspberry Pi. It's okay if you're using SSH to access the Pi shell (you don't
+need to use a keyboard connected to the Pi)—you only need a monitor attached to
+the Pi to see the camera stream.
 
-----------------------------------------------
-<a id="about_sunfounder"></a>
-### About SunFounder
-SunFounder is a technology company focused on Raspberry Pi and Arduino open source community development. Committed to the promotion of open source culture, we strives to bring the fun of electronics making to people all around the world and enable everyone to be a maker. Our products include learning kits, development boards, robots, sensor modules and development tools. In addition to high quality products, SunFounder also offers video tutorials to help you make your own project. If you have interest in open source or making something cool, welcome to join us!
+## Download the example files
 
-----------------------------------------------
-<a id="license"></a>
-### License
-This is the code for PiCar-4WD.
-This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+First, clone this Git repo onto your Raspberry Pi like this:
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied wa rranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+```
+git clone https://github.com/tensorflow/examples --depth 1
+```
 
-You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+Then use our script to install a couple Python packages, and download the
+EfficientDet-Lite model:
 
-PiCar-4WD comes with ABSOLUTELY NO WARRANTY; for details run ./show w. This is free software, and you are welcome to redistribute it under certain conditions; run ./show c for details.
+```
+cd examples/lite/examples/object_detection/raspberry_pi
 
-SunFounder, Inc., hereby disclaims all copyright interest in the program 'PiCar-4WD' (which makes passes at compilers).
+# The script install the required dependencies and download the TFLite models.
+sh setup.sh
+```
 
-Mike Huang, 21 August 2015
+In this project, all you need from the TensorFlow Lite API is the `Interpreter`
+class. So instead of installing the large `tensorflow` package, we're using the
+much smaller `tflite_runtime` package. The setup scripts automatically install
+the TensorFlow Lite runtime.
 
-Mike Huang, Chief Executive Officer
+## Run the example
 
-Email: service@sunfounder.com, support@sunfounder.com
+```
+python3 detect.py \
+  --model efficientdet_lite0.tflite
+```
 
-----------------------------------------------
-<a id="contact_us"></a>
-### Contact us:
-website:
-	www.sunfounder.com
+You should see the camera feed appear on the monitor attached to your Raspberry
+Pi. Put some objects in front of the camera, like a coffee mug or keyboard, and
+you'll see boxes drawn around those that the model recognizes, including the
+label and score for each. It also prints the number of frames per second (FPS)
+at the top-left corner of the screen. As the pipeline contains some processes
+other than model inference, including visualizing the detection results, you can
+expect a higher FPS if your inference pipeline runs in headless mode without
+visualization.
 
-E-mail:
-	service@sunfounder.com, support@sunfounder.com
+For more information about executing inferences with TensorFlow Lite, read
+[TensorFlow Lite inference](https://www.tensorflow.org/lite/guide/inference).
+
+## Speed up model inference (optional)
+
+If you want to significantly speed up the inference time, you can attach an
+[Coral USB Accelerator](https://coral.withgoogle.com/products/accelerator)—a USB
+accessory that adds the
+[Edge TPU ML accelerator](https://coral.withgoogle.com/docs/edgetpu/faq/) to any
+Linux-based system.
+
+If you have a Coral USB Accelerator, you can run the sample with it enabled:
+
+1.  First, be sure you have completed the
+    [USB Accelerator setup instructions](https://coral.withgoogle.com/docs/accelerator/get-started/).
+
+2.  Run the object detection script using the EdgeTPU TFLite model and enable
+    the EdgeTPU option. Be noted that the EdgeTPU requires a specific TFLite
+    model that is different from the one used above.
+
+```
+python3 detect.py \
+  --enableEdgeTPU
+  --model efficientdet_lite0_edgetpu.tflite
+```
+
+You should see significantly faster inference speeds.
+
+For more information about creating and running TensorFlow Lite models with
+Coral devices, read
+[TensorFlow models on the Edge TPU](https://coral.withgoogle.com/docs/edgetpu/models-intro/).
