@@ -173,7 +173,16 @@ def main():
     scan_data_to_map()
     print("hello")
     while True:
-        print(detection_queue.get())
+        # if detection queue contains a person or stopsign, print the category_name)#
+        # DetectionResult(detections=[Detection(bounding_box=BoundingBox(origin_x=300, origin_y=-7, width=338, height=365), categories=[Category(index=0, score=0.4140625, display_name='', category_name='person')])]
+        if not detection_queue.empty():
+            detection_result = detection_queue.get()
+            for detection in detection_result.detections:
+                print(detection.categories[0].category_name)
+                if detection.categories[0].category_name == 'person':
+                    print("Person detected")
+                elif detection.categories[0].category_name == 'stop sign':
+                    print("Stop sign detected")
 
         print("\n--- Starting new navigation cycle ---")
         time.sleep(.1)
