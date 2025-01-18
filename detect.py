@@ -67,6 +67,14 @@ def run(model: str, width: int, height: int, num_threads: int,
             # Run object detection estimation using the model
             detection_result = detector.detect(input_tensor)
 
+            # Print detected objects and their sizes
+            for detection in detection_result.detections:
+                category = detection.categories[0].category_name
+                bbox = detection.bounding_box
+                width = bbox.width
+                height = bbox.height
+                print(f"Detected {category} with size (width: {width}, height: {height})")
+
             # Draw keypoints and edges on input image
             image = utils.visualize(image, detection_result)
 
@@ -83,7 +91,7 @@ def run(model: str, width: int, height: int, num_threads: int,
                         font_size, text_color, font_thickness)
 
             # Display the result
-            cv2.imshow('object_detector', image)
+            # cv2.imshow('object_detector', image)  # Commented out to disable preview
 
             # Stop the program if the ESC key is pressed
             if cv2.waitKey(1) == 27:
