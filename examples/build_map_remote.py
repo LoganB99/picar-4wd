@@ -148,6 +148,7 @@ def scan_data_to_map():
                 'distance': distance,
             })
 
+    fc.get_distance_at(0)
     # Send scan data to server
     try:
         response = requests.post(
@@ -178,7 +179,6 @@ def main():
         if not detection_queue.empty():
             detection_result = detection_queue.get()
             for detection in detection_result.detections:
-                print(detection.categories[0].category_name)
                 if detection.categories[0].category_name == 'person':
                     print("Person detected")
                 elif detection.categories[0].category_name == 'stop sign':

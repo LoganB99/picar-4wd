@@ -85,7 +85,7 @@ class Detect:
 
 if __name__ == "__main__":
     detection_queue = queue.Queue()
-    detect = Detect(detection_queue=detection_queue, num_threads = 1, enable_edgetpu=False)
+    detect = Detect(detection_queue=detection_queue, enable_preview = True,width=640, height=480, num_threads = 1, enable_edgetpu=False)
     detect.start()
 
     try:
