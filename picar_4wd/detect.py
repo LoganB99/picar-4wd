@@ -5,7 +5,7 @@ from libcamera import Transform
 from tflite_support.task import core
 from tflite_support.task import processor
 from tflite_support.task import vision
-import utils
+from picar_4wd import detect_utils
 import time
 import threading
 import queue
@@ -57,7 +57,7 @@ class Detect:
                 counter += 1
                 detection_result = self.process_frame(image)
                 self.detection_queue.put(detection_result)
-                image = utils.visualize(image, detection_result)
+                image = detect_utils.visualize(image, detection_result)
 
                 if counter % fps_avg_frame_count == 0:
                     end_time = time.time()
@@ -84,7 +84,7 @@ class Detect:
 
 if __name__ == "__main__":
     detection_queue = queue.Queue()
-    detect = Detect(detection_queue=detection_queue, enable_edgetpu=False)
+    detect = Detect(detection_queue=detection_queue, num_threads = 1, enable_edgetpu=False)
     detect.start()
 
     try:

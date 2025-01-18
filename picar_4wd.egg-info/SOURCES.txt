@@ -6,6 +6,8 @@ setup.cfg
 setup.py
 picar_4wd/__init__.py
 picar_4wd/adc.py
+picar_4wd/detect.py
+picar_4wd/detect_utils.py
 picar_4wd/filedb.py
 picar_4wd/i2c.py
 picar_4wd/motor.py

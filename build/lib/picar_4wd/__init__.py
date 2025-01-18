@@ -8,6 +8,7 @@ from .servo import Servo
 from .ultrasonic import Ultrasonic 
 from .speed import Speed
 from .filedb import FileDB  
+from .detect import Detect
 from .utils import *
 import time
 from .version import __version__

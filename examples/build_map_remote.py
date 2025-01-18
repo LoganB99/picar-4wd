@@ -4,6 +4,7 @@ import time
 import requests
 import json
 import picar_4wd as fc
+import queue
 import random
 
 # Map dimensions in cm
@@ -15,7 +16,7 @@ CAR_START_Y = 0
 # Scanning parameters
 SCAN_START_ANGLE = -89
 SCAN_END_ANGLE = 89
-SCAN_ANGLE_STEP = 8
+SCAN_ANGLE_STEP = 10
 ANGLES_TO_SCAN = list(range(SCAN_START_ANGLE, SCAN_END_ANGLE, SCAN_ANGLE_STEP))
 
 SPEED = 50
@@ -31,6 +32,8 @@ car_x = CAR_START_X
 car_y = CAR_START_Y
 last_update_time = time.time()
 direction = 'N'  # N, E, S, W
+
+detect = None
 
 # todo: is south really south, once map updates, make sure we are going right direction
 
@@ -161,56 +164,53 @@ def scan_data_to_map():
         time.sleep(1)  # Wait before retrying
 
 def main():
+    global detect
     fc.start_speed_thread()
+    detection_queue = queue.Queue()
+    detect = fc.Detect(detection_queue=detection_queue, enable_edgetpu=False, num_threads = 4)
+    detect.start()
     print("Starting autonomous navigation...")
     scan_data_to_map()
+    print("hello")
     while True:
-        # gs_list = fc.get_grayscale_list()
-        # if fc.get_line_status(GRAYSCALE_REF, gs_list) == 0:
-        #     print("\nLINE DETECTED - VICTORY LAP!")
-        #     fc.turn_left(100)
-        #     time.sleep(4)
-        #     fc.stop()
-        #     break
+        print(detection_queue.get())
 
         print("\n--- Starting new navigation cycle ---")
-        start_time = time.time()
-        while time.time() - start_time < 5:
-            update_car_position()
-            scan_list = get_complete_scan()
-            print(f"Scan list: {scan_list}")
-            if not check_path_clear(scan_list):
-                print("\nPath blocked - executing avoidance maneuver")
-                fc.stop()
+        time.sleep(5)
+
+        update_car_position()
+            # if not check_path_clear(scan_list):
+            #     print("\nPath blocked - executing avoidance maneuver")
+            #     fc.stop()
                 
-                if try_random_unstuck():
-                    continue
+            #     if try_random_unstuck():
+            #         continue
                     
-                print("Moving backward briefly")
-                fc.backward(SPEED)
-                time.sleep(.25)
-                fc.stop()
+            #     print("Moving backward briefly")
+            #     fc.backward(SPEED)
+            #     time.sleep(.25)
+            #     fc.stop()
                 
-                turn_right_90_deg()
-                scan_list = get_complete_scan()
-                if not check_path_clear(scan_list):
-                    turn_left_90_deg()
-                    turn_left_90_deg()
-                    scan_list = get_complete_scan()
-                    if not check_path_clear(scan_list):
-                        turn_right_90_deg()
-                        print("Failed to find clear path - restarting navigation cycle")
-                        break
-                    else:
-                        print("Path clear after turning left twice - moving forward")
-                        fc.forward(SPEED)
-                else:
-                    print("Path clear after turning right - moving forward")
-                    fc.forward(SPEED)
-            else:
-                print("Path clear - moving forward")
-                fc.forward(SPEED)
-            time.sleep(0.1)  # Small delay between position updates
+            #     turn_right_90_deg()
+            #     scan_list = get_complete_scan()
+            #     if not check_path_clear(scan_list):
+            #         turn_left_90_deg()
+            #         turn_left_90_deg()
+            #         scan_list = get_complete_scan()
+            #         if not check_path_clear(scan_list):
+            #             turn_right_90_deg()
+            #             print("Failed to find clear path - restarting navigation cycle")
+            #             break
+            #         else:
+            #             print("Path clear after turning left twice - moving forward")
+            #             fc.forward(SPEED)
+            #     else:
+            #         print("Path clear after turning right - moving forward")
+            #         fc.forward(SPEED)
+            # else:
+            #     print("Path clear - moving forward")
+            #     fc.forward(SPEED)
+            # time.sleep(0.1)  # Small delay between position updates
         
         fc.stop()
         scan_data_to_map()
@@ -220,6 +220,8 @@ if __name__ == "__main__":
         main()
     finally:
         fc.stop()
+        if detect:
+            detect.stop()
         fc.left_rear_speed.deinit()
         fc.right_rear_speed.deinit()
         print('Program stopped')
