@@ -6,6 +6,7 @@ import json
 import picar_4wd as fc
 import queue
 import random
+import sys
 
 # Map dimensions in cm
 MAP_WIDTH = 200  
@@ -14,12 +15,13 @@ CAR_START_X = MAP_WIDTH // 2  # Car starts at middle bottom
 CAR_START_Y = 0
 
 # Scanning parameters
-SCAN_START_ANGLE = -89
-SCAN_END_ANGLE = 89
+SCAN_START_ANGLE = -90
+SCAN_END_ANGLE = 90
 SCAN_ANGLE_STEP = 10
 ANGLES_TO_SCAN = list(range(SCAN_START_ANGLE, SCAN_END_ANGLE, SCAN_ANGLE_STEP))
 
-SPEED = 50
+SPEED = 10  # Set car speed to 10
+TURN_SPEED = 50  # Set turn speed to 50
 SCAN_REF = 35
 GRAYSCALE_REF = 400
 FORWARD_SCAN_RANGE = slice(3,7)  # Indices for forward-facing sensors
@@ -31,7 +33,7 @@ SERVER_URL = "http://192.168.1.108:5000"
 car_x = CAR_START_X
 car_y = CAR_START_Y
 last_update_time = time.time()
-direction = 'N'  # N, E, S, W
+direction = 'N'  # N, NE, E, SE, S, SW, W, NW
 
 detect = None
 
@@ -41,18 +43,46 @@ map_array = np.zeros((MAP_HEIGHT, MAP_WIDTH))
 def turn_left_90_deg():
     global direction
     print("Turning left 90 degrees")
-    fc.turn_left(SPEED)
+    fc.turn_left(TURN_SPEED)
     time.sleep(1)  # Adjust the time based on power_val to achieve a 90-degree turn
     fc.stop()
-    direction = {'N': 'W', 'W': 'S', 'S': 'E', 'E': 'N'}[direction]
+    direction = {
+        'N': 'W', 'NE': 'NW', 'E': 'N', 'SE': 'NE',
+        'S': 'E', 'SW': 'SE', 'W': 'S', 'NW': 'SW'
+    }[direction]
 
 def turn_right_90_deg():
     global direction
     print("Turning right 90 degrees")
-    fc.turn_right(SPEED)
+    fc.turn_right(TURN_SPEED)
     time.sleep(1)  # Adjust the time based on power_val to achieve a 90-degree turn
     fc.stop()
-    direction = {'N': 'E', 'E': 'S', 'S': 'W', 'W': 'N'}[direction]
+    direction = {
+        'N': 'E', 'NE': 'SE', 'E': 'S', 'SE': 'SW',
+        'S': 'W', 'SW': 'NW', 'W': 'N', 'NW': 'NE'
+    }[direction]
+
+def turn_left_45_deg():
+    global direction
+    print("Turning left 45 degrees")
+    fc.turn_left(TURN_SPEED)
+    time.sleep(0.5)  # Adjust the time based on power_val to achieve a 45-degree turn
+    fc.stop()
+    direction = {
+        'N': 'NW', 'NE': 'N', 'E': 'NE', 'SE': 'E',
+        'S': 'SE', 'SW': 'S', 'W': 'SW', 'NW': 'W'
+    }[direction]
+
+def turn_right_45_deg():
+    global direction
+    print("Turning right 45 degrees")
+    fc.turn_right(TURN_SPEED)
+    time.sleep(0.5)  # Adjust the time based on power_val to achieve a 45-degree turn
+    fc.stop()
+    direction = {
+        'N': 'NE', 'NE': 'E', 'E': 'SE', 'SE': 'S',
+        'S': 'SW', 'SW': 'W', 'W': 'NW', 'NW': 'N'
+    }[direction]
 
 def get_complete_scan():
     """Helper function to get a complete scan"""
@@ -72,7 +102,7 @@ def try_random_unstuck():
     """Randomly try to unstuck with 20% chance"""
     if random.random() < 0.2:
         print("\nTrying random unstuck maneuver")
-        fc.turn_right(SPEED)
+        fc.turn_right(TURN_SPEED)
         time.sleep(0.1)
         fc.stop()
         return True
@@ -92,12 +122,24 @@ def update_car_position():
     # Update position based on direction
     if direction == 'N':
         car_y += distance
+    elif direction == 'NE':
+        car_x += distance / math.sqrt(2)
+        car_y += distance / math.sqrt(2)
     elif direction == 'E':
         car_x += distance
+    elif direction == 'SE':
+        car_x += distance / math.sqrt(2)
+        car_y -= distance / math.sqrt(2)
     elif direction == 'S':
         car_y -= distance
+    elif direction == 'SW':
+        car_x -= distance / math.sqrt(2)
+        car_y -= distance / math.sqrt(2)
     elif direction == 'W':
         car_x -= distance
+    elif direction == 'NW':
+        car_x -= distance / math.sqrt(2)
+        car_y += distance / math.sqrt(2)
     
     last_update_time = current_time
     
@@ -160,15 +202,60 @@ def connect_points(map_array, x1, y1, x2, y2):
             y += sy
     map_array[int(y2), int(x2)] = 1
 
+def a_star_search(map_array, start, goal):
+    def heuristic(a, b):
+        return abs(a[0] - b[0]) + abs(a[1] - b[1])
+    # maintain an open set of nodes to explore. lowest f-score is explored first
+    open_set = queue.PriorityQueue()
+    open_set.put((0, start))
+    came_from = {}
+    # g-score is the cost from 
+    g_score = {start: 0}
+    f_score = {start: heuristic(start, goal)}
+
+    while not open_set.empty():
+        current = open_set.get()[1]
+        if current == goal:
+            # reconstruct path
+            # initially empty path
+            path = []
+            # while the goal node is in the came_from dictionary
+            while current in came_from:
+                # add the current node to the path
+                path.append(current)
+                # set the current node to the node that came before it
+                current = came_from[current]
+            # no more current nodes, add the start node
+            path.append(start)
+            # reverse the path to get the correct order
+            path.reverse()
+            # return the path
+            return path
+        
+        # Get neighbors (Manhattan distance)
+        neighbors = [
+            (current[0] + dx, current[1] + dy)
+            for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]
+        ]
+
+        for neighbor in neighbors:
+            tentative_g_score = g_score[current] + 1
+            if 0 <= neighbor[0] < len(map_array) and 0 <= neighbor[1] < len(map_array[0]):
+                if map_array[neighbor[1]][neighbor[0]] == 1:
+                    continue
+                if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
+                    came_from[neighbor] = current
+                    g_score[neighbor] = tentative_g_score
+                    f_score[neighbor] = tentative_g_score + heuristic(neighbor, goal)
+                    # lowest f-score is highest priority
+                    open_set.put((f_score[neighbor], neighbor))
+    print("No path found")
+    return None
+
 def scan_data_to_map():
     global car_x, car_y, last_update_time, map_array
     
     print("\n--- Starting new environment scan ---")
-    
-    # Reset car position when scanning
-    car_x = CAR_START_X
-    car_y = CAR_START_Y
-    last_update_time = time.time()
     
     # Clear the map
     map_array = np.zeros((MAP_HEIGHT, MAP_WIDTH))
@@ -219,8 +306,6 @@ def scan_data_to_map():
             
             if dist <= MAX_POINT_DISTANCE:
                 connect_points(map_array, x1, y1, x2, y2)
-
-    fc.get_distance_at(0)
     
     # Send processed map data to server
     try:
@@ -238,7 +323,7 @@ def scan_data_to_map():
         time.sleep(1)
 
 def main():
-    global detect
+    global detect, car_x, car_y
     fc.start_speed_thread()
     detection_queue = queue.Queue()
     detect = fc.Detect(detection_queue=detection_queue, enable_edgetpu=False, num_threads = 4)
@@ -246,6 +331,32 @@ def main():
     print("Starting autonomous navigation...")
     scan_data_to_map()
     print("hello")
+    
+    # Get goal from arguments
+    if len(sys.argv) != 3:
+        print("Usage: python build_map_remote.py <forward_distance> <left_or_right_distance>")
+        sys.exit(1)
+    
+    forward_distance = int(sys.argv[1])
+    left_or_right_distance = int(sys.argv[2])
+    
+    goal_x = car_x + forward_distance
+    goal_y = car_y + left_or_right_distance
+    
+    # Send goal to server
+    try:
+        response = requests.post(
+            f"{SERVER_URL}/set_goal",
+            json={'goal_x': goal_x, 'goal_y': goal_y},
+            timeout=5
+        )
+        if response.status_code != 200:
+            print(f"Error sending goal: {response.status_code}")
+        else:
+            print("Successfully sent goal to server")
+    except requests.exceptions.RequestException as e:
+        print(f"Failed to connect to server: {e}")
+    
     while True:
         # if detection queue contains a person or stopsign, print the category_name)#
         # DetectionResult(detections=[Detection(bounding_box=BoundingBox(origin_x=300, origin_y=-7, width=338, height=365), categories=[Category(index=0, score=0.4140625, display_name='', category_name='person')])]
@@ -261,38 +372,44 @@ def main():
         time.sleep(.1)
 
         update_car_position()
-            # if not check_path_clear(scan_list):
-            #     print("\nPath blocked - executing avoidance maneuver")
-            #     fc.stop()
+        
+        # Check if car is within 5 cm of the goal
+        if abs(car_x - goal_x) <= 5 and abs(car_y - goal_y) <= 5:
+            print("Goal reached!")
+            break
+        
+        # if not check_path_clear(scan_list):
+        #     print("\nPath blocked - executing avoidance maneuver")
+        #     fc.stop()
+            
+        #     if try_random_unstuck():
+        #         continue
                 
-            #     if try_random_unstuck():
-            #         continue
-                    
-            #     print("Moving backward briefly")
-            #     fc.backward(SPEED)
-            #     time.sleep(.25)
-            #     fc.stop()
-                
-            #     turn_right_90_deg()
-            #     scan_list = get_complete_scan()
-            #     if not check_path_clear(scan_list):
-            #         turn_left_90_deg()
-            #         turn_left_90_deg()
-            #         scan_list = get_complete_scan()
-            #         if not check_path_clear(scan_list):
-            #             turn_right_90_deg()
-            #             print("Failed to find clear path - restarting navigation cycle")
-            #             break
-            #         else:
-            #             print("Path clear after turning left twice - moving forward")
-            #             fc.forward(SPEED)
-            #     else:
-            #         print("Path clear after turning right - moving forward")
-            #         fc.forward(SPEED)
-            # else:
-            #     print("Path clear - moving forward")
-            #     fc.forward(SPEED)
-            # time.sleep(0.1)  # Small delay between position updates
+        #     print("Moving backward briefly")
+        #     fc.backward(SPEED)
+        #     time.sleep(.25)
+        #     fc.stop()
+            
+        #     turn_right_90_deg()
+        #     scan_list = get_complete_scan()
+        #     if not check_path_clear(scan_list):
+        #         turn_left_90_deg()
+        #         turn_left_90_deg()
+        #         scan_list = get_complete_scan()
+        #         if not check_path_clear(scan_list):
+        #             turn_right_90_deg()
+        #             print("Failed to find clear path - restarting navigation cycle")
+        #             break
+        #         else:
+        #             print("Path clear after turning left twice - moving forward")
+        #             fc.forward(SPEED)
+        #     else:
+        #         print("Path clear after turning right - moving forward")
+        #         fc.forward(SPEED)
+        # else:
+        #     print("Path clear - moving forward")
+        #     fc.forward(SPEED)
+        # time.sleep(0.1)  # Small delay between position updates
         
         fc.stop()
         # scan_data_to_map()
