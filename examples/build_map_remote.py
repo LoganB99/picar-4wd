@@ -176,7 +176,7 @@ def main():
         print(detection_queue.get())
 
         print("\n--- Starting new navigation cycle ---")
-        time.sleep(5)
+        time.sleep(.1)
 
         update_car_position()
             # if not check_path_clear(scan_list):
@@ -213,7 +213,7 @@ def main():
             # time.sleep(0.1)  # Small delay between position updates
         
         fc.stop()
-        scan_data_to_map()
+        # scan_data_to_map()
 
 if __name__ == "__main__":
     try:

@@ -68,6 +68,7 @@ class Detect:
                     cv2.imshow('object_detector', image)
                 if cv2.waitKey(1) == 27:
                     break
+                time.sleep(0.2)
 
         except Exception as e:
             logging.error(f"An error occurred: {e}")
