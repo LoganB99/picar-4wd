@@ -40,49 +40,30 @@ detect = None
 # Map array for local calculations
 map_array = np.zeros((MAP_HEIGHT, MAP_WIDTH))
 
-def turn_left_90_deg():
-    global direction
-    print("Turning left 90 degrees")
-    fc.turn_left(TURN_SPEED)
-    time.sleep(1)  # Adjust the time based on power_val to achieve a 90-degree turn
+def turn_and_move(angle, duration):
+    global direction, last_update_time
+    print(f"Turning {angle} degrees and moving")
+    if angle > 0:
+        fc.turn_right(TURN_SPEED)
+    else:
+        fc.turn_left(TURN_SPEED)
+    time.sleep(abs(angle) / 90)  # Adjust the time based on power_val to achieve the desired turn
     fc.stop()
-    direction = {
-        'N': 'W', 'NE': 'NW', 'E': 'N', 'SE': 'NE',
-        'S': 'E', 'SW': 'SE', 'W': 'S', 'NW': 'SW'
-    }[direction]
-
-def turn_right_90_deg():
-    global direction
-    print("Turning right 90 degrees")
-    fc.turn_right(TURN_SPEED)
-    time.sleep(1)  # Adjust the time based on power_val to achieve a 90-degree turn
+    
+    # Update direction
+    directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
+    current_index = directions.index(direction)
+    new_index = (current_index + angle // 45) % 8
+    direction = directions[new_index]
+    
+    # Move forward
+    fc.forward(SPEED)
+    time.sleep(duration)
+    
+    # Update car position while moving
+    update_car_position(moving=True)
+    
     fc.stop()
-    direction = {
-        'N': 'E', 'NE': 'SE', 'E': 'S', 'SE': 'SW',
-        'S': 'W', 'SW': 'NW', 'W': 'N', 'NW': 'NE'
-    }[direction]
-
-def turn_left_45_deg():
-    global direction
-    print("Turning left 45 degrees")
-    fc.turn_left(TURN_SPEED)
-    time.sleep(0.5)  # Adjust the time based on power_val to achieve a 45-degree turn
-    fc.stop()
-    direction = {
-        'N': 'NW', 'NE': 'N', 'E': 'NE', 'SE': 'E',
-        'S': 'SE', 'SW': 'S', 'W': 'SW', 'NW': 'W'
-    }[direction]
-
-def turn_right_45_deg():
-    global direction
-    print("Turning right 45 degrees")
-    fc.turn_right(TURN_SPEED)
-    time.sleep(0.5)  # Adjust the time based on power_val to achieve a 45-degree turn
-    fc.stop()
-    direction = {
-        'N': 'NE', 'NE': 'E', 'E': 'SE', 'SE': 'S',
-        'S': 'SW', 'SW': 'W', 'W': 'NW', 'NW': 'N'
-    }[direction]
 
 def get_complete_scan():
     """Helper function to get a complete scan"""
@@ -108,13 +89,13 @@ def try_random_unstuck():
         return True
     return False
 
-def update_car_position():
+def update_car_position(moving=False):
     global car_x, car_y, last_update_time
     current_time = time.time()
     elapsed_time = current_time - last_update_time
     
     # Get current speed in mm/s and convert to cm/s
-    speed = fc.speed_val() / 10
+    speed = fc.speed_val() / 10 if moving else 0
     
     # Calculate distance traveled in cm
     distance = speed * elapsed_time
@@ -390,14 +371,13 @@ def main():
         #     time.sleep(.25)
         #     fc.stop()
             
-        #     turn_right_90_deg()
+        #     turn_and_move(90, 1)
         #     scan_list = get_complete_scan()
         #     if not check_path_clear(scan_list):
-        #         turn_left_90_deg()
-        #         turn_left_90_deg()
+        #         turn_and_move(-180, 1)
         #         scan_list = get_complete_scan()
         #         if not check_path_clear(scan_list):
-        #             turn_right_90_deg()
+        #             turn_and_move(90, 1)
         #             print("Failed to find clear path - restarting navigation cycle")
         #             break
         #         else:

@@ -35,7 +35,7 @@ class Detect:
 
     def initialize_model(self):
         base_options = core.BaseOptions(file_name=self.model, use_coral=self.enable_edgetpu, num_threads=self.num_threads)
-        detection_options = processor.DetectionOptions(max_results=3, score_threshold=0.3)
+        detection_options = processor.DetectionOptions(max_results=3, score_threshold=0.4)
         options = vision.ObjectDetectorOptions(base_options=base_options, detection_options=detection_options)
         return vision.ObjectDetector.create_from_options(options)
 
@@ -57,17 +57,19 @@ class Detect:
                 counter += 1
                 detection_result = self.process_frame(image)
                 self.detection_queue.put(detection_result)
-                image = detect_utils.visualize(image, detection_result)
+
+                if self.enable_preview:
+                    image = detect_utils.visualize(image, detection_result)
+                    cv2.imshow('object_detector', image)
+                    if cv2.waitKey(1) == 27:
+                        break
 
                 if counter % fps_avg_frame_count == 0:
                     end_time = time.time()
                     fps = fps_avg_frame_count / (end_time - start_time)
                     start_time = time.time()
                     logging.info(f"FPS: {fps:.2f}")
-                if self.enable_preview:
-                    cv2.imshow('object_detector', image)
-                if cv2.waitKey(1) == 27:
-                    break
+
                 time.sleep(0.2)
 
         except Exception as e:
