@@ -5,7 +5,7 @@ import termios
 import asyncio
 import time
 
-power_val = 100
+power_val = 10
 key = 'status'
 print("If you want to quit.Please press q")
 def readchar():
@@ -32,17 +32,13 @@ def readkey(getchar_fn=None):
 def turn_left_90_deg():
     print("Turning left 90 degrees")
     fc.turn_left(power_val)
-    if power_val != 0:
-        time_asleep = -0.015 * power_val + 2
-        time.sleep(time_asleep)  # Adjust the time based on power_val to achieve a 90-degree turn
+    time.sleep(1)
     fc.stop()
 
 def turn_right_90_deg():
     print("Turning right 90 degrees")
     fc.turn_right(power_val)
-    if power_val != 0:
-        time_asleep = -0.015 * power_val + 2
-        time.sleep(time_asleep)  # Adjust the time based on power_val to achieve a 90-degree turn
+    time.sleep(1)
     fc.stop()
 
 
