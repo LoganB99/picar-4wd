@@ -24,7 +24,9 @@ def try_direction(turn_func, turn_time):
     time.sleep(turn_time)
     fc.stop()
     scan_list = fc.scan_step(SCAN_REF)
-    return check_path_clear(scan_list) if scan_list else False
+    while not scan_list:
+        scan_list = fc.scan_step(SCAN_REF)
+    return check_path_clear(scan_list)
 
 def turn_for_path(turn_func, max_turn_time=0.25):
     """Turn until path is clear or we've turned too long
@@ -45,7 +47,6 @@ def turn_for_path(turn_func, max_turn_time=0.25):
 def main():
     while True:
         gs_list = fc.get_grayscale_list()
-        print(gs_list)
         if fc.get_line_status(GRAYSCALE_REF, gs_list) == 0:
             print("Line detected - you win")
             fc.turn_left(100)
