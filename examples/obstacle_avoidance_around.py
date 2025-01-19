@@ -71,14 +71,40 @@ def main():
             #     fc.turn_left(SPEED)
             #     time.sleep(right_time*.5)
             #     fc.stop()
-
-            check = try_direction(fc.turn_right, 0.9)
-            if check:
+            # try right
+            check_right = try_direction(fc.turn_right, 0.9)
+            if check_right:
                 fc.forward(SPEED)
-                time.sleep(0.5)
-                break
+                time.sleep(1)
+                fc.stop()
+                check_left = try_direction(fc.turn_left, 0.9)
+                if check_left:
+                    fc.forward(SPEED)
+                    time.sleep(1)
+                    fc.stop()
+                    check_left = try_direction(fc.turn_left, 0.9)
+                    if check_left:
+                        fc.forward(SPEED)
+                        time.sleep(1)
+                        fc.stop()
+                        break
             else:
-                break
+                fc.turn_left(TURN_SPEED)
+                time.sleep(.9)
+                fc.stop()
+                # try left
+                check_left = try_direction(fc.turn_left, 0.9)
+                if check_left:
+                    fc.forward(SPEED)
+                    time.sleep(0.5)
+                    break
+                else:
+                    #both failed, turn around
+                    fc.turn_left(TURN_SPEED)
+                    time.sleep(.9)
+                    fc.stop()
+                    break
+
         else:
             fc.forward(SPEED)
 
