@@ -80,7 +80,7 @@ def main():
                 check_left = try_direction(fc.turn_left, 0.9)
                 if check_left:
                     fc.forward(SPEED)
-                    time.sleep(1)
+                    time.sleep(2)
                     fc.stop()
                     check_left = try_direction(fc.turn_left, 0.9)
                     if check_left:
