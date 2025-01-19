@@ -2,7 +2,8 @@ import picar_4wd as fc
 import time
 
 # Global constants
-SPEED = 20
+SPEED = 10
+TURN_SPEED = 50
 SCAN_REF = 35
 GRAYSCALE_REF = 400
 FORWARD_SCAN_RANGE = slice(3,7)  # Indices for forward-facing sensors
@@ -19,7 +20,7 @@ def try_direction(turn_func, turn_time):
     Returns:
         bool: True if path is clear after turn, False otherwise
     """
-    turn_func(SPEED)
+    turn_func(TURN_SPEED)
     time.sleep(turn_time)
     fc.stop()
     scan_list = fc.scan_step(SCAN_REF)
@@ -59,18 +60,22 @@ def main():
         if not check_path_clear(scan_list):
             fc.stop()
             fc.backward(SPEED)
-            time.sleep(.25)
+            time.sleep(.5)
             fc.stop()
-            
-            right_time = turn_for_path(fc.turn_right, 4)
-            if right_time != -1:
-                fc.forward(SPEED)
-                time.sleep(right_time*.5)
-                fc.stop()
-                fc.turn_left(SPEED)
-                time.sleep(right_time*.5)
-                fc.stop()
 
+            # right_time = turn_for_path(fc.turn_right, 4)
+            # if right_time != -1:
+            #     time.sleep(right_time*.5)
+            #     fc.stop()
+            #     fc.turn_left(SPEED)
+            #     time.sleep(right_time*.5)
+            #     fc.stop()
+
+            check = try_direction(fc.turn_right, 0.9)
+            if check:
+                fc.forward(SPEED)
+                time.sleep(0.5)
+                break
             else:
                 break
         else:
