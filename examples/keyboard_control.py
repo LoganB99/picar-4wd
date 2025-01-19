@@ -5,9 +5,11 @@ import termios
 import asyncio
 import time
 
-power_val = 10
+forward_speed = 10
+turn_speed = 50
 key = 'status'
 print("If you want to quit.Please press q")
+
 def readchar():
     fd = sys.stdin.fileno()
     old_settings = termios.tcgetattr(fd)
@@ -31,45 +33,36 @@ def readkey(getchar_fn=None):
 
 def turn_left_90_deg():
     print("Turning left 90 degrees")
-    fc.turn_left(power_val)
-    time.sleep(1)
+    fc.turn_left(turn_speed)
+    time.sleep(1.5)
     fc.stop()
 
 def turn_right_90_deg():
     print("Turning right 90 degrees")
-    fc.turn_right(power_val)
-    time.sleep(1)
+    fc.turn_right(turn_speed)
+    time.sleep(1.5)
     fc.stop()
-
 
 def Keyborad_control():
     while True:
-        global power_val
-        key=readkey()
-        if key=='6':
-            if power_val <=90:
-                power_val += 10
-                print("power_val:",power_val)
-        elif key=='4':
-            if power_val >=10:
-                power_val -= 10
-                print("power_val:",power_val)
-        if key=='w':
-            fc.forward(power_val)
-        elif key=='a':
-            fc.turn_left(power_val)
-        elif key=='s':
-            fc.backward(power_val)
-        elif key=='d':
-            fc.turn_right(power_val)
-        elif key=='l':
+        key = readkey()
+        if key == 'w':
+            fc.forward(forward_speed)
+        elif key == 'a':
+            fc.turn_left(turn_speed)
+        elif key == 's':
+            fc.backward(forward_speed)
+        elif key == 'd':
+            fc.turn_right(turn_speed)
+        elif key == 'l':
             turn_left_90_deg()
-        elif key=='r':
+        elif key == 'r':
             turn_right_90_deg()
         else:
             fc.stop()
-        if key=='q':
+        if key == 'q':
             print("quit")  
             break  
+
 if __name__ == '__main__':
     Keyborad_control()
