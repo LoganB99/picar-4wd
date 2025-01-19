@@ -88,7 +88,7 @@ def main():
                     fc.forward(SPEED)
                     time.sleep(1)
                     fc.stop()
-                    try_direction(fc.turn_right(.9)
+                    try_direction(fc.turn_right, .9)
                 else: #both failed, turn around
                     fc.turn_left(TURN_SPEED)
                     time.sleep(.9)
