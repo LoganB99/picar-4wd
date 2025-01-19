@@ -8,9 +8,10 @@ def main():
     while True:
         scan_list = False
         while not scan_list:
-            scan_list = fc.scan_step(35)
+            scan_list = fc.scan_step(45)
         tmp = scan_list[3:7]
-        if tmp != [2,2,2,2]:
+        print(tmp)
+        if tmp != [2,2,2,2] and tmp != [2,2]:
             # Stop when obstacle detected
             fc.stop()
             fc.backward(speed)
