@@ -61,7 +61,7 @@ def main():
         if not check_path_clear(scan_list):
             fc.stop()
             fc.backward(SPEED)
-            time.sleep(.5)
+            time.sleep(.25)
             fc.stop()
 
             # right_time = turn_for_path(fc.turn_right, 4)
@@ -77,17 +77,7 @@ def main():
                 fc.forward(SPEED)
                 time.sleep(1)
                 fc.stop()
-                check_left = try_direction(fc.turn_left, 0.9)
-                if check_left:
-                    fc.forward(SPEED)
-                    time.sleep(2)
-                    fc.stop()
-                    check_left = try_direction(fc.turn_left, 0.9)
-                    if check_left:
-                        fc.forward(SPEED)
-                        time.sleep(1)
-                        fc.stop()
-                        break
+                try_direction(fc.turn_left, 0.9)
             else:
                 fc.turn_left(TURN_SPEED)
                 time.sleep(.9)
@@ -96,15 +86,14 @@ def main():
                 check_left = try_direction(fc.turn_left, 0.9)
                 if check_left:
                     fc.forward(SPEED)
-                    time.sleep(0.5)
-                    break
-                else:
-                    #both failed, turn around
+                    time.sleep(1)
+                    fc.stop()
+                    try_direction(fc.turn_right(.9)
+                else: #both failed, turn around
                     fc.turn_left(TURN_SPEED)
                     time.sleep(.9)
                     fc.stop()
                     break
-
         else:
             fc.forward(SPEED)
 
