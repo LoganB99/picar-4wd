@@ -6,6 +6,7 @@ SPEED = 10
 TURN_SPEED = 50
 SCAN_REF = 35
 GRAYSCALE_REF = 400
+TURN_TIME=.88
 FORWARD_SCAN_RANGE = slice(3,7)  # Indices for forward-facing sensors
 
 def check_path_clear(scan_list):
@@ -72,26 +73,26 @@ def main():
             #     time.sleep(right_time*.5)
             #     fc.stop()
             # try right
-            check_right = try_direction(fc.turn_right, 0.9)
+            check_right = try_direction(fc.turn_right, TURN_TIME)
             if check_right:
                 fc.forward(SPEED)
                 time.sleep(1)
                 fc.stop()
-                try_direction(fc.turn_left, 0.9)
+                try_direction(fc.turn_left, TURN_TIME)
             else:
                 fc.turn_left(TURN_SPEED)
-                time.sleep(.9)
+                time.sleep(TURN_TIME)
                 fc.stop()
                 # try left
-                check_left = try_direction(fc.turn_left, 0.9)
+                check_left = try_direction(fc.turn_left, TURN_TIME)
                 if check_left:
                     fc.forward(SPEED)
                     time.sleep(1)
                     fc.stop()
-                    try_direction(fc.turn_right, .9)
+                    try_direction(fc.turn_right, TURN_TIME)
                 else: #both failed, turn around
                     fc.turn_left(TURN_SPEED)
-                    time.sleep(.9)
+                    time.sleep(TURN_TIME)
                     fc.stop()
                     break
         else:

@@ -19,23 +19,24 @@ class Detect:
         self.model = model if not enable_edgetpu else 'efficientdet_lite0_edgetpu.tflite'
         self.num_threads = num_threads
         self.enable_edgetpu = enable_edgetpu
+        self.enable_preview = enable_preview
         self.detection_queue = detection_queue if detection_queue else queue.Queue()
         self.picam2 = self.initialize_camera()
         self.detector = self.initialize_model()
         self.thread = threading.Thread(target=self.run)
         self.thread_flag = True
-        self.enable_preview = enable_preview
 
     def initialize_camera(self) -> Picamera2:
         picam2 = Picamera2()
-        preview_config = picam2.create_preview_configuration(main={"size": (self.width, self.height)}, transform=Transform(hflip=0, vflip=1))
-        picam2.configure(preview_config)
+        if self.enable_preview:
+            preview_config = picam2.create_preview_configuration(main={"size": (self.width, self.height)}, transform=Transform(hflip=0, vflip=1))
+            picam2.configure(preview_config)
         picam2.start()
         return picam2
 
     def initialize_model(self):
         base_options = core.BaseOptions(file_name=self.model, use_coral=self.enable_edgetpu, num_threads=self.num_threads)
-        detection_options = processor.DetectionOptions(max_results=3, score_threshold=0.4)
+        detection_options = processor.DetectionOptions(max_results=3, score_threshold=0.3)
         options = vision.ObjectDetectorOptions(base_options=base_options, detection_options=detection_options)
         return vision.ObjectDetector.create_from_options(options)
 
@@ -87,7 +88,7 @@ class Detect:
 
 if __name__ == "__main__":
     detection_queue = queue.Queue()
-    detect = Detect(detection_queue=detection_queue, enable_preview = True,width=640, height=480, num_threads = 1, enable_edgetpu=False)
+    detect = Detect(detection_queue=detection_queue, enable_preview = False,width=640, height=480, num_threads = 2, enable_edgetpu=False)
     detect.start()
 
     try:
