@@ -9,8 +9,8 @@ import random
 import sys
 
 # Map dimensions in cm
-MAP_WIDTH = 200  
-MAP_HEIGHT = 100
+MAP_WIDTH = 600  
+MAP_HEIGHT = 600
 CAR_START_X = MAP_WIDTH // 2  # Car starts at middle bottom
 CAR_START_Y = 0
 
@@ -25,15 +25,15 @@ TURN_SPEED = 50  # Set turn speed to 50
 SCAN_REF = 35
 GRAYSCALE_REF = 400
 FORWARD_SCAN_RANGE = slice(3,7)  # Indices for forward-facing sensors
+TURN_SLEEP = .88
 
-# Server settings
 SERVER_URL = "http://192.168.1.108:5000"
 
 # Car position tracking
 car_x = CAR_START_X
 car_y = CAR_START_Y
 last_update_time = time.time()
-direction = 'N'  # N, NE, E, SE, S, SW, W, NW
+direction = 'N'
 
 detect = None
 
@@ -47,7 +47,7 @@ def turn_and_move(angle, duration):
         fc.turn_right(TURN_SPEED)
     else:
         fc.turn_left(TURN_SPEED)
-    time.sleep(abs(angle) / 90)  # Adjust the time based on power_val to achieve the desired turn
+    time.sleep(TURN_SLEEP)
     fc.stop()
     
     # Update direction
@@ -56,12 +56,13 @@ def turn_and_move(angle, duration):
     new_index = (current_index + angle // 45) % 8
     direction = directions[new_index]
     
+    start_time = time.time()
     # Move forward
     fc.forward(SPEED)
     time.sleep(duration)
     
     # Update car position while moving
-    update_car_position(moving=True)
+    update_car_position(moving=True, start_time=start_time)
     
     fc.stop()
 
@@ -89,10 +90,10 @@ def try_random_unstuck():
         return True
     return False
 
-def update_car_position(moving=False):
-    global car_x, car_y, last_update_time
+def update_car_position(moving=False, start_time=None):
+    global car_x, car_y
     current_time = time.time()
-    elapsed_time = current_time - last_update_time
+    elapsed_time = current_time - start_time
     
     # Get current speed in mm/s and convert to cm/s
     speed = fc.speed_val() / 10 if moving else 0
@@ -121,8 +122,6 @@ def update_car_position(moving=False):
     elif direction == 'NW':
         car_x -= distance / math.sqrt(2)
         car_y += distance / math.sqrt(2)
-    
-    last_update_time = current_time
     
     print(f"Updated position - X: {car_x:.1f}, Y: {car_y:.1f}, Speed: {speed:.1f} cm/s, Direction: {direction}")
     
@@ -310,8 +309,7 @@ def main():
     detect = fc.Detect(detection_queue=detection_queue, enable_edgetpu=False, num_threads = 4)
     detect.start()
     print("Starting autonomous navigation...")
-    scan_data_to_map()
-    print("hello")
+    
     
     # Get goal from arguments
     if len(sys.argv) != 3:
@@ -323,6 +321,13 @@ def main():
     
     goal_x = car_x + forward_distance
     goal_y = car_y + left_or_right_distance
+
+    print(f"Goal: {goal_x}, {goal_y}")
+
+    scan_data_to_map()
+
+    path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
+    print(path)
     
     # Send goal to server
     try:
@@ -338,60 +343,37 @@ def main():
     except requests.exceptions.RequestException as e:
         print(f"Failed to connect to server: {e}")
     
+    
+    steps_before_rescan = 10
     while True:
-        # if detection queue contains a person or stopsign, print the category_name)#
-        # DetectionResult(detections=[Detection(bounding_box=BoundingBox(origin_x=300, origin_y=-7, width=338, height=365), categories=[Category(index=0, score=0.4140625, display_name='', category_name='person')])]
-        if not detection_queue.empty():
-            detection_result = detection_queue.get()
-            for detection in detection_result.detections:
-                if detection.categories[0].category_name == 'person':
-                    print("Person detected")
-                elif detection.categories[0].category_name == 'stop sign':
-                    print("Stop sign detected")
+        break
+        # Check if an obstacle is detected
+        # if not detection_queue.empty():
+        #     detection_result = detection_queue.get()
+        #     for detection in detection_result.detections:
+        #         if detection.categories[0].category_name == 'person':
+        #             print("Person detected")
+        #             fc.stop()
+        #         elif detection.categories[0].category_name == 'stop sign':
+        #             print("Stop sign detected")
 
-        print("\n--- Starting new navigation cycle ---")
-        time.sleep(.1)
-
-        update_car_position()
-        
         # Check if car is within 5 cm of the goal
-        if abs(car_x - goal_x) <= 5 and abs(car_y - goal_y) <= 5:
-            print("Goal reached!")
-            break
+        # if abs(car_x - goal_x) <= 5 and abs(car_y - goal_y) <= 5:
+        #     print("Goal reached!")
+        #     break
+
+        # Check if we need to rescan
+        # if steps_before_rescan == 0:
+        #     scan_data_to_map()
+        #     steps_before_rescan = 10
+        # steps_before_rescan -= 1
+
+
         
-        # if not check_path_clear(scan_list):
-        #     print("\nPath blocked - executing avoidance maneuver")
-        #     fc.stop()
             
-        #     if try_random_unstuck():
-        #         continue
-                
-        #     print("Moving backward briefly")
-        #     fc.backward(SPEED)
-        #     time.sleep(.25)
-        #     fc.stop()
-            
-        #     turn_and_move(90, 1)
-        #     scan_list = get_complete_scan()
-        #     if not check_path_clear(scan_list):
-        #         turn_and_move(-180, 1)
-        #         scan_list = get_complete_scan()
-        #         if not check_path_clear(scan_list):
-        #             turn_and_move(90, 1)
-        #             print("Failed to find clear path - restarting navigation cycle")
-        #             break
-        #         else:
-        #             print("Path clear after turning left twice - moving forward")
-        #             fc.forward(SPEED)
-        #     else:
-        #         print("Path clear after turning right - moving forward")
-        #         fc.forward(SPEED)
-        # else:
-        #     print("Path clear - moving forward")
-        #     fc.forward(SPEED)
-        # time.sleep(0.1)  # Small delay between position updates
         
-        fc.stop()
+        
+        # fc.stop()
         # scan_data_to_map()
 
 if __name__ == "__main__":

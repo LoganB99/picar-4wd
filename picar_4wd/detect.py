@@ -95,8 +95,8 @@ if __name__ == "__main__":
         while True:
             if not detection_queue.empty():
                 detection_result = detection_queue.get()
-                # Process detection_result and make decisions
-                print(detection_result)  # Replace with actual decision-making logic
+                print(detection_result)
+
             time.sleep(0.1)
     except KeyboardInterrupt:
         pass
