@@ -7,6 +7,7 @@ import time
 
 forward_speed = 10
 turn_speed = 50
+turn_time = .9
 key = 'status'
 print("If you want to quit.Please press q")
 
@@ -34,13 +35,13 @@ def readkey(getchar_fn=None):
 def turn_left_90_deg():
     print("Turning left 90 degrees")
     fc.turn_left(turn_speed)
-    time.sleep(1.5)
+    time.sleep(turn_time)
     fc.stop()
 
 def turn_right_90_deg():
     print("Turning right 90 degrees")
     fc.turn_right(turn_speed)
-    time.sleep(1.5)
+    time.sleep(turn_time)
     fc.stop()
 
 def Keyborad_control():
