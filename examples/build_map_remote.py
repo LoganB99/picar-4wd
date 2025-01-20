@@ -25,7 +25,7 @@ TURN_POWER = 50  # Set turn POWER to 50
 SCAN_REF = 35
 GRAYSCALE_REF = 400
 FORWARD_SCAN_RANGE = slice(3,7)  # Indices for forward-facing sensors
-TURN_SLEEP = .65
+TURN_SLEEP = .75
 
 SERVER_URL = "http://192.168.1.108:5000"
 
@@ -80,7 +80,7 @@ def turn_and_move(cardinal_direction, distance):
     direction = cardinal_direction
     
     # Calculate duration based on speed
-    speed = 33  # Speed in cm/s
+    speed = 40  # Speed in cm/s
     duration = distance / speed
     
     # Move forward
@@ -258,6 +258,7 @@ def scan_data_to_map():
         
     # Scan left to right and collect points
     print("Scanning left to right...")
+    clearance = 8 
     for angle in ANGLES_TO_SCAN:
         distance = fc.get_distance_at(angle)
         if distance > 0:  # Only record valid measurements
@@ -297,17 +298,17 @@ def scan_data_to_map():
                     
 
     # Connect nearby points
-    MAX_POINT_DISTANCE = 10
-    for i in range(len(points)):
-        for j in range(i + 1, len(points)):
-            x1, y1 = points[i]
-            x2, y2 = points[j]
+    #MAX_POINT_DISTANCE = 10
+    #for i in range(len(points)):
+    #    for j in range(i + 1, len(points)):
+    #        x1, y1 = points[i]
+    #        x2, y2 = points[j]
             
             # Calculate distance between points
-            dist = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+    #        dist = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
             
-            if dist <= MAX_POINT_DISTANCE:
-                connect_points(map_array, x1, y1, x2, y2)
+    #        if dist <= MAX_POINT_DISTANCE:
+    #            connect_points(map_array, x1, y1, x2, y2)
     
     # Send processed map data to server
     try:
@@ -346,7 +347,11 @@ def main():
     print(f"Goal: {goal_x}, {goal_y}")
 
     scan_data_to_map()
-
+    print(car_x)
+    print(car_y)
+    print(goal_x)
+    print(goal_y)
+    print(direction)
     path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
     current_path_index = 0
     print(path)
@@ -463,6 +468,8 @@ def main():
         path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
         current_path_index = 0
         print(path)
+        print(direction)
+
         # scan_data_to_map()
 
 if __name__ == "__main__":
