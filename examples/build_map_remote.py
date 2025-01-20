@@ -28,6 +28,8 @@ GRAYSCALE_REF = 400
 FORWARD_SCAN_RANGE = slice(3,7)  # Indices for forward-facing sensors
 TURN_SLEEP = .66
 
+NEED_TO_RESCAN = False
+
 SERVER_URL = "http://192.168.1.108:5000"
 
 # Car position tracking
@@ -96,6 +98,7 @@ def turn_and_move(cardinal_direction, distance):
         time.sleep(.5)
         fc.stop()
         update_car_position(-20)
+        NEED_TO_RESCAN = True
     # Update car position while moving
     
     
@@ -486,9 +489,9 @@ def main():
                 turn_and_move('NW', distance)
 
         # fc.stop()
-        if iterations % 10 == 0:
+        if iterations % 10 == 0 or NEED_TO_RESCAN:
             scan_data_to_map()
-
+            NEED_TO_RESCAN = False
             path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
             current_path_index = 0
             print(path)
