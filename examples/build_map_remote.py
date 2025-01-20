@@ -218,24 +218,8 @@ def a_star_search(map_array, start, goal):
 
     threshold = 10
     def heuristic(a, b):
-        # Standard Euclidean distance
-        return int(math.sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2))
-
-    # Calculate proximity to obstacles
-    obstacle_distance = distance_transform_edt(1 - map_array)
-    max_distance = int(np.max(obstacle_distance))
-
-    # def proximity_penalty(cell):
-    #     # Inverted penalty: higher when closer to obstacles
-    #     distance = int(obstacle_distance[int(cell[1]), int(cell[0])])
-    #     if distance <= threshold:
-    #         penalty = int((max_distance - distance) / max_distance)
-    #     else:
-    #         penalty = 0
-    #     return penalty * penalty_weight  # Scale by a weight factor
-
-    # # Penalty weight for proximity influence
-    # penalty_weight = 2  # Tune this value as needed
+        # manhattan distance
+        return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
     # Maintain an open set of nodes to explore. Lowest f-score is explored first
     open_set = queue.PriorityQueue()
@@ -266,8 +250,7 @@ def a_star_search(map_array, start, goal):
         
         # Get neighbors
         neighbors = [
-            (int(current[0] + dx), int(current[1] + dy))
-            for dx, dy in [(-1, 0), (-1, -1), (-1, 1), (1, 0), (1, -1), (1, 1), (0, -1), (0, 1)]
+            (int(current[0] + dx), int(current[1] + dy)) for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]
         ]
 
         for neighbor in neighbors:
