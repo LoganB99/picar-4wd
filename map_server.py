@@ -95,6 +95,7 @@ def update_visualization():
         x_max = min(MAP_WIDTH, car_x + 100)
         y_min = max(0, car_y - 100)
         y_max = min(MAP_HEIGHT, car_y + 100)
+        print(f"x_min: {x_min}, x_max: {x_max}, y_min: {y_min}, y_max: {y_max}")
         local_map_array = map_array[y_min:y_max, x_min:x_max]
         plt.clf()
         plt.imshow(local_map_array, extent=[x_min, x_max, y_min, y_max], origin='lower', cmap='binary')

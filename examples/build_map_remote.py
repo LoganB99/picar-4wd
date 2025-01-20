@@ -42,6 +42,9 @@ map_array = np.zeros((MAP_HEIGHT, MAP_WIDTH))
 def turn_and_move(cardinal_direction, duration):
     global direction
     directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
+    print("direction is ", direction)
+    print("cardinal_direction is ", cardinal_direction)
+    print("duration is ", duration)
     current_index = directions.index(direction)
     target_index = directions.index(cardinal_direction)
     angle_diff = (target_index - current_index) % 8
@@ -377,30 +380,33 @@ def main():
         travel_steps = 0
         if current_path_index < len(path) and travel_steps < 10:
             next_point = path[current_path_index]
-            dir_change = (next_point[0] - car_x, next_point[1] - car_y)
+            print("next_point is ", next_point)
+            dir_change = (int(next_point[0] - car_x), int(next_point[1] - car_y))
             current_path_index += 1
             print("dir_change is ", dir_change)
-            while current_path_index < len(path) and dir_change == (path[current_path_index][0] - next_point[0], path[current_path_index][1] - next_point[1]) and travel_steps < 10:
+            while current_path_index < len(path) and dir_change == (int(path[current_path_index][0] - next_point[0]), int(path[current_path_index][1] - next_point[1])) and travel_steps < 10:
                 next_point = path[current_path_index]
+                print("next_point is ", next_point)
+                print("path[current_path_index] is ", path[current_path_index])
                 current_path_index += 1
                 travel_steps += 1
             print(f"Moving to next point: {next_point}")
             if dir_change[0] == dir_change[1] and dir_change[0] == 1:
-                turn_and_move('NE', .2 * travel_steps)
+                turn_and_move('NE', .3 * travel_steps)
             elif dir_change[0] == dir_change[1] and dir_change[0] == -1:
-                turn_and_move('SW', .2 * travel_steps)
+                turn_and_move('SW', .3 * travel_steps)
             elif dir_change[0] == 0 and dir_change[1] == 1:
-                turn_and_move('N', .2 * travel_steps)
+                turn_and_move('N', .3 * travel_steps)
             elif dir_change[0] == 0 and dir_change[1] == -1:
-                turn_and_move('S', .2 * travel_steps)
+                turn_and_move('S', .3 * travel_steps)
             elif dir_change[0] == 1 and dir_change[1] == 0:
-                turn_and_move('E', .2 * travel_steps)
+                turn_and_move('E', .3 * travel_steps)
             elif dir_change[0] == -1 and dir_change[1] == 0:
-                turn_and_move('W', .2 * travel_steps)
+                turn_and_move('W', .3 * travel_steps)
             elif dir_change[0] == 1 and dir_change[1] == -1:
-                turn_and_move('SE', .2 * travel_steps)
+                turn_and_move('SE', .3 * travel_steps)
             elif dir_change[0] == -1 and dir_change[1] == 1:
-                turn_and_move('NW', .2 * travel_steps)
+                turn_and_move('NW', .3 * travel_steps)
 
 
         
