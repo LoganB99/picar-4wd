@@ -39,12 +39,12 @@ detect = None
 # Map array for local calculations
 map_array = np.zeros((MAP_HEIGHT, MAP_WIDTH))
 
-def turn_and_move(cardinal_direction, duration):
+def turn_and_move(cardinal_direction, distance):
     global direction
     directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
     print("direction is ", direction)
     print("cardinal_direction is ", cardinal_direction)
-    print("duration is ", duration)
+    print("distance is ", distance)
     current_index = directions.index(direction)
     target_index = directions.index(cardinal_direction)
     angle_diff = (target_index - current_index) % 8
@@ -78,14 +78,18 @@ def turn_and_move(cardinal_direction, duration):
     # Update direction
     direction = cardinal_direction
     
+    # Calculate duration based on speed
+    speed = 31.425  # Speed in cm/s
+    duration = distance / speed
+    
     # Move forward
     fc.forward(POWER)
     time.sleep(duration)
-    
+    fc.stop()
     # Update car position while moving
     update_car_position(moving=True, duration=duration)
     
-    fc.stop()
+    
 
 def get_complete_scan():
     """Helper function to get a complete scan"""
@@ -356,8 +360,6 @@ def main():
         print("goal_x is ", goal_x)
         print("goal_y is ", goal_y)
         iterations = iterations + 1
-        if iterations > 20:
-            break
         # Check if car is within 5 cm of the goal
         if abs(car_x - goal_x) <= 5 and abs(car_y - goal_y) <= 5:
             print("Goal reached!")
@@ -400,24 +402,25 @@ def main():
                 current_path_index += 1
                 travel_steps += 1
             print(f"Moving to next point: {next_point}")
+            distance = math.sqrt(dir_change[0]**2 + dir_change[1]**2) * travel_steps
             if dir_change[0] == dir_change[1] and dir_change[0] == 1:
-                turn_and_move('NE', .22 * travel_steps)
+                turn_and_move('NE', distance)
             elif dir_change[0] == dir_change[1] and dir_change[0] == -1:
-                turn_and_move('SW', .22 * travel_steps)
+                turn_and_move('SW', distance)
             elif dir_change[0] == 0 and dir_change[1] == 1:
                 print(travel_steps)
-                turn_and_move('N', .22 * travel_steps)
+                turn_and_move('N', distance)
                 break
             elif dir_change[0] == 0 and dir_change[1] == -1:
-                turn_and_move('S', .22 * travel_steps)
+                turn_and_move('S', distance)
             elif dir_change[0] == 1 and dir_change[1] == 0:
-                turn_and_move('E', .22 * travel_steps)
+                turn_and_move('E', distance)
             elif dir_change[0] == -1 and dir_change[1] == 0:
-                turn_and_move('W', .22 * travel_steps)
+                turn_and_move('W', distance)
             elif dir_change[0] == 1 and dir_change[1] == -1:
-                turn_and_move('SE', .22 * travel_steps)
+                turn_and_move('SE', distance)
             elif dir_change[0] == -1 and dir_change[1] == 1:
-                turn_and_move('NW', .22 * travel_steps)
+                turn_and_move('NW', distance)
 
 
         
