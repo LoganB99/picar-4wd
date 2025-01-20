@@ -19,17 +19,18 @@ class Detect:
         self.model = model if not enable_edgetpu else 'efficientdet_lite0_edgetpu.tflite'
         self.num_threads = num_threads
         self.enable_edgetpu = enable_edgetpu
+        self.enable_preview = enable_preview
         self.detection_queue = detection_queue if detection_queue else queue.Queue()
         self.picam2 = self.initialize_camera()
         self.detector = self.initialize_model()
         self.thread = threading.Thread(target=self.run)
         self.thread_flag = True
-        self.enable_preview = enable_preview
 
     def initialize_camera(self) -> Picamera2:
         picam2 = Picamera2()
-        preview_config = picam2.create_preview_configuration(main={"size": (self.width, self.height)}, transform=Transform(hflip=0, vflip=1))
-        picam2.configure(preview_config)
+        if self.enable_preview:
+            preview_config = picam2.create_preview_configuration(main={"size": (self.width, self.height)}, transform=Transform(hflip=0, vflip=1))
+            picam2.configure(preview_config)
         picam2.start()
         return picam2
 
@@ -57,17 +58,20 @@ class Detect:
                 counter += 1
                 detection_result = self.process_frame(image)
                 self.detection_queue.put(detection_result)
-                image = detect_utils.visualize(image, detection_result)
+
+                if self.enable_preview:
+                    image = detect_utils.visualize(image, detection_result)
+                    cv2.imshow('object_detector', image)
+                    if cv2.waitKey(1) == 27:
+                        break
 
                 if counter % fps_avg_frame_count == 0:
                     end_time = time.time()
                     fps = fps_avg_frame_count / (end_time - start_time)
                     start_time = time.time()
                     logging.info(f"FPS: {fps:.2f}")
-                if self.enable_preview:
-                    cv2.imshow('object_detector', image)
-                if cv2.waitKey(1) == 27:
-                    break
+
+                time.sleep(0.2)
 
         except Exception as e:
             logging.error(f"An error occurred: {e}")
@@ -84,15 +88,15 @@ class Detect:
 
 if __name__ == "__main__":
     detection_queue = queue.Queue()
-    detect = Detect(detection_queue=detection_queue, num_threads = 1, enable_edgetpu=False)
+    detect = Detect(detection_queue=detection_queue, enable_preview = False,width=640, height=480, num_threads = 2, enable_edgetpu=False)
     detect.start()
 
     try:
         while True:
             if not detection_queue.empty():
                 detection_result = detection_queue.get()
-                # Process detection_result and make decisions
-                print(detection_result)  # Replace with actual decision-making logic
+                print(detection_result)
+
             time.sleep(0.1)
     except KeyboardInterrupt:
         pass

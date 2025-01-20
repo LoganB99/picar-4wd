@@ -118,44 +118,74 @@ def do(msg="", cmd=""):
                       (msg, status, result))
 
 def get_distance_at(angle):
+    """
+    Set the servo to a specific angle and measure the distance using an ultrasonic sensor.
+    
+    Parameters:
+    angle (int): The angle at which to set the servo for distance measurement.
+    
+    Returns:
+    float: The distance measured by the ultrasonic sensor at the specified angle.
+    """
     global angle_distance
-    servo.set_angle(angle)
-    time.sleep(0.04)
-    distance = us.get_distance()
-    angle_distance = [angle, distance]
-    return distance
+    servo.set_angle(angle)  # Set the servo to the specified angle
+    time.sleep(0.04)  # Wait for the servo to reach the position
+    distance = us.get_distance()  # Measure the distance using the ultrasonic sensor
+    angle_distance = [angle, distance]  # Store the angle and distance for reference
+    return distance  # Return the measured distance
 
 def get_status_at(angle, ref1=35, ref2=10):
-    dist = get_distance_at(angle)
-    if dist > ref1 or dist == -2:
-        return 2
-    elif dist > ref2:
-        return 1
+    """
+    Determine the status of an object at a given angle based on distance thresholds.
+    
+    Parameters:
+    angle (int): The angle at which to check the status.
+    ref1 (int): The first reference distance threshold (default is 35).
+    ref2 (int): The second reference distance threshold (default is 10).
+    
+    Returns:
+    int: The status code indicating the object's proximity:
+         2 - Object is far or no valid distance (-2 indicates an error in measurement).
+         1 - Object is at a medium distance.
+         0 - Object is close.
+    """
+    dist = get_distance_at(angle)  # Get the distance at the specified angle
+    if dist > ref1 or dist == -2:  # Check if the distance is greater than the first reference or invalid
+        return 2  # Return status 2 for far or invalid distance
+    elif dist > ref2:  # Check if the distance is greater than the second reference
+        return 1  # Return status 1 for medium distance
     else:
-        return 0
+        return 0  # Return status 0 for close distance
 
 def scan_step(ref):
+    """
+    Perform a scanning step by adjusting the current angle and recording the status of the path.
+    
+    Parameters:
+    ref (int): The reference distance threshold for determining path status.
+    
+    Returns:
+    list or bool: A list of status codes if a full scan is completed, otherwise False.
+    """
     global scan_list, current_angle, us_step
-    current_angle += us_step
-    if current_angle >= max_angle:
-        current_angle = max_angle
-        us_step = -STEP
-    elif current_angle <= min_angle:
-        current_angle = min_angle
-        us_step = STEP
-    status = get_status_at(current_angle, ref1=ref)#ref1
+    current_angle += us_step  # Increment the current angle by the step size
+    if current_angle >= max_angle:  # Check if the current angle exceeds the maximum
+        current_angle = max_angle  # Set to maximum angle
+        us_step = -STEP  # Reverse the step direction
+    elif current_angle <= min_angle:  # Check if the current angle is below the minimum
+        current_angle = min_angle  # Set to minimum angle
+        us_step = STEP  # Reverse the step direction
+    status = get_status_at(current_angle, ref1=ref)  # Get the status at the current angle
 
-    scan_list.append(status)
-    if current_angle == min_angle or current_angle == max_angle:
-        if us_step < 0:
-            # print("reverse")
-            scan_list.reverse()
-        # print(scan_list)
-        tmp = scan_list.copy()
-        scan_list = []
-        return tmp
+    scan_list.append(status)  # Append the status to the scan list
+    if current_angle == min_angle or current_angle == max_angle:  # Check if a full scan is completed
+        if us_step < 0:  # If the step direction is negative
+            scan_list.reverse()  # Reverse the scan list
+        tmp = scan_list.copy()  # Copy the scan list
+        scan_list = []  # Reset the scan list
+        return tmp  # Return the completed scan list
     else:
-        return False
+        return False  # Return False if the scan is not yet complete
 
 ########################################################
 # Motors

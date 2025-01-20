@@ -25,7 +25,7 @@ TURN_POWER = 50  # Set turn POWER to 50
 SCAN_REF = 35
 GRAYSCALE_REF = 400
 FORWARD_SCAN_RANGE = slice(3,7)  # Indices for forward-facing sensors
-TURN_SLEEP = .88
+TURN_SLEEP = .65
 
 SERVER_URL = "http://192.168.1.108:5000"
 
