@@ -489,21 +489,21 @@ def main():
 
             # Then move the car in the correct direction
             if dir_change == (1, 1):
-                turn_and_move('NE', int(distance*1.1))
+                turn_and_move('NE', int(distance))
             elif dir_change == (-1, -1):
-                turn_and_move('SW', int(distance*1.1))
+                turn_and_move('SW', int(distance))
             elif dir_change == (0, 1):
-                turn_and_move('N', int(distance*1.1))
+                turn_and_move('N', int(distance))
             elif dir_change == (0, -1):
-                turn_and_move('S', int(distance*1.1))
+                turn_and_move('S', int(distance))
             elif dir_change == (1, 0):
-                turn_and_move('E', int(distance*1.1))
+                turn_and_move('E', int(distance))
             elif dir_change == (-1, 0):
-                turn_and_move('W', int(distance*1.1))
+                turn_and_move('W', int(distance))
             elif dir_change == (1, -1):
-                turn_and_move('SE', int(distance*1.1))
+                turn_and_move('SE', int(distance))
             elif dir_change == (-1, 1):
-                turn_and_move('NW', int(distance*1.1))
+                turn_and_move('NW', int(distance))
         print("direction is ", direction)
         #print travel steps remaining
         print("travel steps remaining: ", len(path) - current_path_index)
