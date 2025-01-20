@@ -79,9 +79,9 @@ def turn_and_move(cardinal_direction, distance):
     direction = cardinal_direction
     
     # Calculate duration based on speed
-    speed = 31  # Speed in cm/s
+    speed = 43  # Speed in cm/s
     duration = distance / speed
-    
+    print(duration) 
     # Move forward
     fc.forward(POWER)
     time.sleep(duration)
@@ -400,9 +400,7 @@ def main():
             elif dir_change[0] == dir_change[1] and dir_change[0] == -1:
                 turn_and_move('SW', distance)
             elif dir_change[0] == 0 and dir_change[1] == 1:
-                print(travel_steps)
                 turn_and_move('N', distance)
-                break
             elif dir_change[0] == 0 and dir_change[1] == -1:
                 turn_and_move('S', distance)
             elif dir_change[0] == 1 and dir_change[1] == 0:
