@@ -84,12 +84,20 @@ def turn_and_move(cardinal_direction, distance):
     speed = 40  # Speed in cm/s
     duration = distance / speed
     
-    # Move forward
-    fc.forward(POWER)
-    time.sleep(duration)
-    fc.stop()
+    # Move forward if path is clear
+    complete_scan = get_complete_scan()
+    if check_path_clear(complete_scan):
+        fc.forward(POWER)
+        time.sleep(duration)
+        fc.stop()
+        update_car_position(distance)
+    else:
+        fc.backward(POWER)
+        time.sleep(.5)
+        fc.stop()
+        update_car_position(-20)
     # Update car position while moving
-    update_car_position(distance)
+    
     
     
 
