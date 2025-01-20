@@ -209,6 +209,8 @@ def connect_points(map_array, x1, y1, x2, y2):
     map_array[int(y2), int(x2)] = 1
 
 def a_star_search(map_array, start, goal):
+    import time
+
     threshold = 10
     def heuristic(a, b):
         # Standard Euclidean distance
@@ -238,7 +240,14 @@ def a_star_search(map_array, start, goal):
     g_score = {start: 0}
     f_score = {start: heuristic(start, goal)}
 
+    start_time = time.time()
+
     while not open_set.empty():
+        # Check for timeout
+        if time.time() - start_time > 2:
+            print("Search timed out")
+            return None
+
         current = open_set.get()[1]
         if current == goal:
             # Reconstruct path
@@ -372,13 +381,16 @@ def main():
 
     print(f"Goal: {goal_x}, {goal_y}")
 
-    scan_data_to_map()
+    
     print(car_x)
     print(car_y)
     print(goal_x)
     print(goal_y)
     print(direction)
-    path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
+    path = None
+    while path is None:
+        scan_data_to_map()
+        path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
     current_path_index = 0
     print(path)
     # Send goal to server
@@ -490,12 +502,14 @@ def main():
 
         # fc.stop()
         if iterations % 10 == 0 or NEED_TO_RESCAN:
-            scan_data_to_map()
-            NEED_TO_RESCAN = False
-            path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
-            current_path_index = 0
-            print(path)
-            print(direction)
+            path = None
+            while path is None:
+                scan_data_to_map()
+                NEED_TO_RESCAN = False
+                path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
+                current_path_index = 0
+                print(path)
+                print(direction)
 
         # scan_data_to_map()
 
