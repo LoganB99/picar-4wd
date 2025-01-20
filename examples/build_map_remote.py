@@ -210,6 +210,8 @@ def connect_points(map_array, x1, y1, x2, y2):
 
 def a_star_search(map_array, start, goal):
     print("Starting A* search")
+    start = (int(start[0]), int(start[1]))
+    goal = (int(goal[0]), int(goal[1]))
     print("start is ", start)
     print("goal is ", goal)
     import time
@@ -217,17 +219,17 @@ def a_star_search(map_array, start, goal):
     threshold = 10
     def heuristic(a, b):
         # Standard Euclidean distance
-        return math.sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)
+        return int(math.sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2))
 
     # Calculate proximity to obstacles
     obstacle_distance = distance_transform_edt(1 - map_array)
-    max_distance = np.max(obstacle_distance)
+    max_distance = int(np.max(obstacle_distance))
 
     def proximity_penalty(cell):
         # Inverted penalty: higher when closer to obstacles
-        distance = obstacle_distance[int(cell[1]), int(cell[0])]
+        distance = int(obstacle_distance[int(cell[1]), int(cell[0])])
         if distance <= threshold:
-            penalty = (max_distance - distance) / max_distance
+            penalty = int((max_distance - distance) / max_distance)
         else:
             penalty = 0
         return penalty * penalty_weight  # Scale by a weight factor
@@ -264,7 +266,7 @@ def a_star_search(map_array, start, goal):
         
         # Get neighbors
         neighbors = [
-            (current[0] + dx, current[1] + dy)
+            (int(current[0] + dx), int(current[1] + dy))
             for dx, dy in [(-1, 0), (-1, -1), (-1, 1), (1, 0), (1, -1), (1, 1), (0, -1), (0, 1)]
         ]
 
@@ -274,12 +276,12 @@ def a_star_search(map_array, start, goal):
                     continue
                 
                 # Add proximity penalty to the g_score
-                tentative_g_score = g_score[current] + 1 + proximity_penalty(neighbor)
+                tentative_g_score = int(g_score[current] + 1 + proximity_penalty(neighbor))
 
                 if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
                     came_from[neighbor] = current
                     g_score[neighbor] = tentative_g_score
-                    f_score[neighbor] = tentative_g_score + heuristic(neighbor, goal)
+                    f_score[neighbor] = int(tentative_g_score + heuristic(neighbor, goal))
                     open_set.put((f_score[neighbor], neighbor))
     
     print("No path found")
@@ -395,7 +397,7 @@ def main():
         scan_data_to_map()
         path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
     current_path_index = 0
-    print(path)
+    # print(path)
     # Send goal to server
     try:
         response = requests.post(
