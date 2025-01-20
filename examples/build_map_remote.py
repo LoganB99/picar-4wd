@@ -259,6 +259,7 @@ def scan_data_to_map():
     # Scan left to right and collect points
     print("Scanning left to right...")
     for angle in ANGLES_TO_SCAN:
+        print("scanning angle ", angle)
         distance = fc.get_distance_at(angle)
         if distance > 0:  # Only record valid measurements
             # Clear points along the ray until obstacle
