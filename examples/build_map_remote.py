@@ -502,17 +502,19 @@ def main():
                 turn_and_move('SE', distance*1.1)
             elif dir_change == (-1, 1):
                 turn_and_move('NW', distance*1.1)
-
+        print("direction is ", direction)
+        #print travel steps remaining
+        print("travel steps remaining: ", len(path) - current_path_index)
         # fc.stop()
-        if iterations % 10 == 0 or NEED_TO_RESCAN:
-            path = None
-            while path is None:
-                scan_data_to_map()
-                NEED_TO_RESCAN = False
-                path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
-                current_path_index = 0
-                print(path)
-                print(direction)
+        # if iterations % 10 == 0 or NEED_TO_RESCAN:
+        #     path = None
+        #     while path is None:
+        #         scan_data_to_map()
+        #         NEED_TO_RESCAN = False
+        #         path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
+        #         current_path_index = 0
+        #         print(path)
+        #         print(direction)
 
         # scan_data_to_map()
 
