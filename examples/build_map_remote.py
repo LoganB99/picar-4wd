@@ -209,6 +209,9 @@ def connect_points(map_array, x1, y1, x2, y2):
     map_array[int(y2), int(x2)] = 1
 
 def a_star_search(map_array, start, goal):
+    print("Starting A* search")
+    print("start is ", start)
+    print("goal is ", goal)
     import time
 
     threshold = 10
@@ -246,17 +249,7 @@ def a_star_search(map_array, start, goal):
         # Check for timeout
         if time.time() - start_time > 2:
             print("Search timed out")
-            # Return naive straight-line path
-            path = []
-            current = start
-            while current != goal:
-                path.append(current)
-                # Move one step towards the goal
-                step_x = 1 if goal[0] > current[0] else -1 if goal[0] < current[0] else 0
-                step_y = 1 if goal[1] > current[1] else -1 if goal[1] < current[1] else 0
-                current = (current[0] + step_x, current[1] + step_y)
-            path.append(goal)
-            return path
+            return None
 
         current = open_set.get()[1]
         if current == goal:
