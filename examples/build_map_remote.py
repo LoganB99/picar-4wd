@@ -236,7 +236,8 @@ def a_star_search(map_array, start, goal):
         for neighbor in neighbors:
             tentative_g_score = g_score[current] + 1
             if 0 <= neighbor[0] < len(map_array) and 0 <= neighbor[1] < len(map_array[0]):
-                if map_array[neighbor[1]][neighbor[0]] == 1:
+                print(neighbor[1],neighbor[0])
+                if map_array[int(neighbor[1])][int(neighbor[0])] == 1:
                     continue
                 if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
                     came_from[neighbor] = current
@@ -352,7 +353,6 @@ def main():
     path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
     current_path_index = 0
     print(path)
-    
     # Send goal to server
     try:
         response = requests.post(
@@ -461,6 +461,11 @@ def main():
                 turn_and_move('NW', distance)
 
         # fc.stop()
+        scan_data_to_map()
+
+        path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
+        current_path_index = 0
+        print(path)
         # scan_data_to_map()
 
 if __name__ == "__main__":
