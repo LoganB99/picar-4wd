@@ -79,7 +79,7 @@ def turn_and_move(cardinal_direction, distance):
     direction = cardinal_direction
     
     # Calculate duration based on speed
-    speed = 31.425  # Speed in cm/s
+    speed = 31  # Speed in cm/s
     duration = distance / speed
     
     # Move forward
@@ -87,7 +87,7 @@ def turn_and_move(cardinal_direction, distance):
     time.sleep(duration)
     fc.stop()
     # Update car position while moving
-    update_car_position(moving=True, duration=duration)
+    update_car_position(distance)
     
     
 
@@ -115,16 +115,8 @@ def try_random_unstuck():
         return True
     return False
 
-def update_car_position(moving=False, duration=0):
+def update_car_position(distance):
     global car_x, car_y
-    elapsed_time = duration
-    
-    # Hardcoded speed in cm/s
-    speed = 31.425 if moving else 0
-    print(speed, "cm/s")
-    print(duration)
-    # Calculate distance traveled in cm
-    distance = speed * elapsed_time
     print(distance) 
     # Update position based on direction
     if direction == 'N':
@@ -148,7 +140,7 @@ def update_car_position(moving=False, duration=0):
         car_x -= distance / math.sqrt(2)
         car_y += distance / math.sqrt(2)
     
-    print(f"Updated position - X: {car_x:.1f}, Y: {car_y:.1f}, Speed: {speed:.1f} cm/s, Direction: {direction}")
+    print(f"Updated position - X: {car_x:.1f}, Y: {car_y:.1f}")
     
     # Send position update to server
     try:
