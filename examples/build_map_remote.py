@@ -325,7 +325,7 @@ def main():
     scan_data_to_map()
 
     path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
-    current_path_index = 1
+    current_path_index = 0
     print(path)
     
     # Send goal to server
@@ -378,8 +378,7 @@ def main():
 
 
         travel_steps = 1  # ensure we move at least one step
-        print("current_path_index is", current_path_index)
-        print("len(path) is", len(path))
+        current_path_index += 1
 
         if current_path_index < len(path):
             next_point = path[current_path_index]
