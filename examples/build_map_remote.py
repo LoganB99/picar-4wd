@@ -79,7 +79,7 @@ def turn_and_move(cardinal_direction, distance):
     direction = cardinal_direction
     
     # Calculate duration based on speed
-    speed = 40  # Speed in cm/s
+    speed = 33  # Speed in cm/s
     duration = distance / speed
     
     # Move forward
@@ -390,11 +390,11 @@ def main():
             print("next_point is", next_point)
             print("dir_change is", dir_change)
 
-            # Try to continue moving in the same direction up to 10 total steps
+            # Try to continue moving in the same direction up to 30 total steps
             # Check future points in path to see if they continue the same direction
             while (
                 current_path_index + 1 < len(path) and
-                travel_steps < 10
+                travel_steps < 30
             ):
                 # Direction from path[current_path_index] to path[current_path_index+1]
                 next_dir = (
