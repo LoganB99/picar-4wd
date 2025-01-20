@@ -13,7 +13,7 @@ from scipy.ndimage import distance_transform_edt
 MAP_WIDTH = 600  
 MAP_HEIGHT = 600
 CAR_START_X = MAP_WIDTH // 2  # Car starts at middle bottom
-CAR_START_Y = 0
+CAR_START_Y = MAP_HEIGHT // 2
 
 # Scanning parameters
 SCAN_START_ANGLE = -90

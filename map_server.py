@@ -14,7 +14,7 @@ app = Flask(__name__)
 MAP_WIDTH = 600  
 MAP_HEIGHT = 600
 CAR_START_X = MAP_WIDTH // 2  # Car starts at middle bottom
-CAR_START_Y = 0
+CAR_START_Y = MAP_HEIGHT // 2
 
 # Point connection parameters
 MAX_POINT_DISTANCE = 10 # Maximum distance in cm to connect points
