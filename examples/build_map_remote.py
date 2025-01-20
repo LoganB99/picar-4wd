@@ -345,12 +345,14 @@ def main():
     
     
     steps_before_rescan = 10
+    iterations = 0
     while True:
-        continue
+        print("Starting iteration ", iterations)
+        iterations = iterations + 1
         # Check if car is within 5 cm of the goal
-        # if abs(car_x - goal_x) <= 5 and abs(car_y - goal_y) <= 5:
-        #     print("Goal reached!")
-        #     break
+        if abs(car_x - goal_x) <= 5 and abs(car_y - goal_y) <= 5:
+            print("Goal reached!")
+            break
 
         # Check if we need to rescan
         # if steps_before_rescan == 0:
@@ -377,7 +379,8 @@ def main():
             next_point = path[current_path_index]
             dir_change = (next_point[0] - car_x, next_point[1] - car_y)
             current_path_index += 1
-            while current_path_index < len(path) and dir_change == (path[current_path_index][0] - next_point[0], path[current_path_index][1] - next_point[1]):
+            print("dir_change is ", dir_change)
+            while current_path_index < len(path) and dir_change == (path[current_path_index][0] - next_point[0], path[current_path_index][1] - next_point[1]) and travel_steps < 10:
                 next_point = path[current_path_index]
                 current_path_index += 1
                 travel_steps += 1
