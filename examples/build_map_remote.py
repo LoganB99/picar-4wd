@@ -32,7 +32,6 @@ SERVER_URL = "http://192.168.1.108:5000"
 # Car position tracking
 car_x = CAR_START_X
 car_y = CAR_START_Y
-last_update_time = time.time()
 direction = 'N'
 
 detect = None
@@ -40,29 +39,48 @@ detect = None
 # Map array for local calculations
 map_array = np.zeros((MAP_HEIGHT, MAP_WIDTH))
 
-def turn_and_move(angle, duration):
-    global direction, last_update_time
+def turn_and_move(cardinal_direction, duration):
+    global direction
+    directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
+    current_index = directions.index(direction)
+    target_index = directions.index(cardinal_direction)
+    angle_diff = (target_index - current_index) % 8
+
+    if angle_diff == 1 or angle_diff == -7:
+        angle = 45
+    elif angle_diff == 2 or angle_diff == -6:
+        angle = 90
+    elif angle_diff == 3 or angle_diff == -5:
+        angle = 135
+    elif angle_diff == 4 or angle_diff == -4:
+        angle = 180
+    elif angle_diff == 5 or angle_diff == -3:
+        angle = -135
+    elif angle_diff == 6 or angle_diff == -2:
+        angle = -90
+    elif angle_diff == 7 or angle_diff == -1:
+        angle = -45
+    else:
+        angle = 0
+
     print(f"Turning {angle} degrees and moving")
     if angle > 0:
         fc.turn_right(TURN_SPEED)
-    else:
+    elif angle < 0:
         fc.turn_left(TURN_SPEED)
-    time.sleep(TURN_SLEEP)
+    if angle != 0:
+        time.sleep(abs(angle) / 90 * TURN_SLEEP)
     fc.stop()
     
     # Update direction
-    directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
-    current_index = directions.index(direction)
-    new_index = (current_index + angle // 45) % 8
-    direction = directions[new_index]
+    direction = cardinal_direction
     
-    start_time = time.time()
     # Move forward
     fc.forward(SPEED)
     time.sleep(duration)
     
     # Update car position while moving
-    update_car_position(moving=True, start_time=start_time)
+    update_car_position(moving=True, duration=duration)
     
     fc.stop()
 
@@ -90,10 +108,9 @@ def try_random_unstuck():
         return True
     return False
 
-def update_car_position(moving=False, start_time=None):
+def update_car_position(moving=False, duration=0):
     global car_x, car_y
-    current_time = time.time()
-    elapsed_time = current_time - start_time
+    elapsed_time = duration
     
     # Get current speed in mm/s and convert to cm/s
     speed = fc.speed_val() / 10 if moving else 0
@@ -149,19 +166,14 @@ def get_xy_coords(angle, distance):
     return (map_x, map_y)
 
 def connect_points(map_array, x1, y1, x2, y2):
-    # Get slope between points
-    if x2 - x1 == 0:  # Vertical line
-        slope = float('inf')
-    else:
-        slope = (y2 - y1) / (x2 - x1)
-    
-    # Draw line between points using Bresenham's algorithm
+    # Bresenham's algorithm
     dx = abs(x2 - x1)
     dy = abs(y2 - y1)
     x, y = x1, y1
     sx = 1 if x2 > x1 else -1
     sy = 1 if y2 > y1 else -1
     
+    # if the line is more morizontal than vertical, increment x more
     if dx > dy:
         err = dx / 2.0
         while x != x2:
@@ -171,6 +183,7 @@ def connect_points(map_array, x1, y1, x2, y2):
                 y += sy
                 err += dx
             x += sx
+    # if the line is more vertical than horizontal, increment y more
     else:
         err = dy / 2.0
         while y != y2:
@@ -183,8 +196,9 @@ def connect_points(map_array, x1, y1, x2, y2):
     map_array[int(y2), int(x2)] = 1
 
 def a_star_search(map_array, start, goal):
+    global direction
     def heuristic(a, b):
-        return abs(a[0] - b[0]) + abs(a[1] - b[1])
+        return math.sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)
     # maintain an open set of nodes to explore. lowest f-score is explored first
     open_set = queue.PriorityQueue()
     open_set.put((0, start))
@@ -212,10 +226,10 @@ def a_star_search(map_array, start, goal):
             # return the path
             return path
         
-        # Get neighbors (Manhattan distance)
+        # Get neighbors
         neighbors = [
             (current[0] + dx, current[1] + dy)
-            for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]
+            for dx, dy in [(-1, 0), (-1, -1), (-1, 1), (1, 0), (1, -1), (1, 1), (0, -1), (0, 1)]
         ]
 
         for neighbor in neighbors:
@@ -233,7 +247,7 @@ def a_star_search(map_array, start, goal):
     return None
 
 def scan_data_to_map():
-    global car_x, car_y, last_update_time, map_array
+    global car_x, car_y, map_array
     
     print("\n--- Starting new environment scan ---")
     
@@ -252,30 +266,15 @@ def scan_data_to_map():
                 if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
                     map_array[y, x] = 0
                     
-            # Mark the obstacle point
-            x, y = get_xy_coords(angle, distance)
-            if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
-                points.append((x, y))
-                map_array[y, x] = 1
-
-    # Scan right to left
-    print("Scanning right to left...")
-    for angle in reversed(ANGLES_TO_SCAN[:-1]):
-        distance = fc.get_distance_at(angle)
-        if distance > 0:
-            # Process point same as above
-            for d in range(int(distance)):
-                x, y = get_xy_coords(angle, d)
+            # Mark the obstacle point and a clearance of 3cm
+            for i in range(3):
+                x, y = get_xy_coords(angle, distance + i)
                 if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
-                    map_array[y, x] = 0
-                    
-            x, y = get_xy_coords(angle, distance)
-            if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
-                points.append((x, y))
-                map_array[y, x] = 1
+                    points.append((x, y))
+                    map_array[y, x] = 1
 
     # Connect nearby points
-    MAX_POINT_DISTANCE = 10  # Maximum distance in cm to connect points
+    MAX_POINT_DISTANCE = 10
     for i in range(len(points)):
         for j in range(i + 1, len(points)):
             x1, y1 = points[i]
@@ -327,6 +326,7 @@ def main():
     scan_data_to_map()
 
     path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
+    current_path_index = 0
     print(path)
     
     # Send goal to server
@@ -347,6 +347,20 @@ def main():
     steps_before_rescan = 10
     while True:
         continue
+        # Check if car is within 5 cm of the goal
+        # if abs(car_x - goal_x) <= 5 and abs(car_y - goal_y) <= 5:
+        #     print("Goal reached!")
+        #     break
+
+        # Check if we need to rescan
+        # if steps_before_rescan == 0:
+        #     scan_data_to_map()
+        #     steps_before_rescan = 10
+        #     path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
+        #     current_path_index = 0
+        #     print(path)
+        # steps_before_rescan -= 1
+
         # Check if an obstacle is detected
         # if not detection_queue.empty():
         #     detection_result = detection_queue.get()
@@ -357,17 +371,36 @@ def main():
         #         elif detection.categories[0].category_name == 'stop sign':
         #             print("Stop sign detected")
 
-        # Check if car is within 5 cm of the goal
-        # if abs(car_x - goal_x) <= 5 and abs(car_y - goal_y) <= 5:
-        #     print("Goal reached!")
-        #     break
 
-        # Check if we need to rescan
-        # if steps_before_rescan == 0:
-        #     scan_data_to_map()
-        #     steps_before_rescan = 10
-        # steps_before_rescan -= 1
+        travel_steps = 0
+        if current_path_index < len(path) and travel_steps < 10:
+            next_point = path[current_path_index]
+            dir_change = (next_point[0] - car_x, next_point[1] - car_y)
+            current_path_index += 1
+            while current_path_index < len(path) and dir_change == (path[current_path_index][0] - next_point[0], path[current_path_index][1] - next_point[1]):
+                next_point = path[current_path_index]
+                current_path_index += 1
+                travel_steps += 1
+            print(f"Moving to next point: {next_point}")
+            if dir_change[0] == dir_change[1] and dir_change[0] == 1:
+                turn_and_move('NE', .2 * travel_steps)
+            elif dir_change[0] == dir_change[1] and dir_change[0] == -1:
+                turn_and_move('SW', .2 * travel_steps)
+            elif dir_change[0] == 0 and dir_change[1] == 1:
+                turn_and_move('N', .2 * travel_steps)
+            elif dir_change[0] == 0 and dir_change[1] == -1:
+                turn_and_move('S', .2 * travel_steps)
+            elif dir_change[0] == 1 and dir_change[1] == 0:
+                turn_and_move('E', .2 * travel_steps)
+            elif dir_change[0] == -1 and dir_change[1] == 0:
+                turn_and_move('W', .2 * travel_steps)
+            elif dir_change[0] == 1 and dir_change[1] == -1:
+                turn_and_move('SE', .2 * travel_steps)
+            elif dir_change[0] == -1 and dir_change[1] == 1:
+                turn_and_move('NW', .2 * travel_steps)
 
+
+        
 
         
             
