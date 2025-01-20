@@ -259,7 +259,6 @@ def scan_data_to_map():
     # Scan left to right and collect points
     print("Scanning left to right...")
     for angle in ANGLES_TO_SCAN:
-        print("scanning angle ", angle)
         distance = fc.get_distance_at(angle)
         if distance > 0:  # Only record valid measurements
             # Clear points along the ray until obstacle
@@ -268,12 +267,29 @@ def scan_data_to_map():
                 if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
                     map_array[y, x] = 0
                     
-            # Mark the obstacle point and a clearance of 3cm
-            for i in range(3):
-                x, y = get_xy_coords(angle, distance + i)
+            # Mark the obstacle point and a clearance of 2 degrees
+            for i in range(2):
+                x, y = get_xy_coords(angle + i, distance)
                 if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
                     points.append((x, y))
                     map_array[y, x] = 1
+    print("scanning right to left...")
+    for angle in reversed(ANGLES_TO_SCAN):
+        distance = fc.get_distance_at(angle)
+        if distance > 0:  # Only record valid measurements
+            # Clear points along the ray until obstacle
+            for d in range(int(distance)):
+                x, y = get_xy_coords(angle, d)
+                if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
+                    map_array[y, x] = 0
+            
+            # Mark the obstacle point and a clearance of 
+            for i in range(2):
+                x, y = get_xy_coords(angle + i, distance)
+                if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
+                    points.append((x, y))
+                    map_array[y, x] = 1
+                
 
     # Connect nearby points
     MAX_POINT_DISTANCE = 10
