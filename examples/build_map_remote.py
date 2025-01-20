@@ -259,36 +259,43 @@ def scan_data_to_map():
     # Scan left to right and collect points
     print("Scanning left to right...")
     for angle in ANGLES_TO_SCAN:
-        distance = fc.get_distance_at(angle)
-        if distance > 0:  # Only record valid measurements
-            # Clear points along the ray until obstacle
-            for d in range(int(distance)):
-                x, y = get_xy_coords(angle, d)
-                if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
-                    map_array[y, x] = 0
-                    
-            # Mark the obstacle point and a clearance of 2 degrees
-            for i in range(2):
-                x, y = get_xy_coords(angle + i, distance)
-                if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
-                    points.append((x, y))
-                    map_array[y, x] = 1
-    print("scanning right to left...")
-    for angle in reversed(ANGLES_TO_SCAN):
-        distance = fc.get_distance_at(angle)
-        if distance > 0:  # Only record valid measurements
-            # Clear points along the ray until obstacle
-            for d in range(int(distance)):
-                x, y = get_xy_coords(angle, d)
-                if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
-                    map_array[y, x] = 0
-            
-            # Mark the obstacle point and a clearance of 
-            for i in range(2):
-                x, y = get_xy_coords(angle + i, distance)
-                if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
-                    points.append((x, y))
-                    map_array[y, x] = 1
+    distance = fc.get_distance_at(angle)
+    if distance > 0:  # Only record valid measurements
+        # Clear points along the ray until the obstacle
+        for d in range(int(distance)):
+            x, y = get_xy_coords(angle, d)
+            if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
+                map_array[y, x] = 0
+        
+        # Get obstacle point coordinates once
+        x, y = get_xy_coords(angle, distance)
+        # Mark the obstacle point with clearance
+        for dx in range(-3, 4):
+            for dy in range(-3, 4):
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < MAP_WIDTH and 0 <= ny < MAP_HEIGHT:
+                    points.append((nx, ny))
+                    map_array[ny, nx] = 1
+
+print("Scanning right to left...")
+for angle in reversed(ANGLES_TO_SCAN):
+    distance = fc.get_distance_at(angle)
+    if distance > 0:  # Only record valid measurements
+        # Clear points along the ray until the obstacle
+        for d in range(int(distance)):
+            x, y = get_xy_coords(angle, d)
+            if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
+                map_array[y, x] = 0
+        
+        # Get obstacle point coordinates once
+        x, y = get_xy_coords(angle, distance)
+        # Mark the obstacle point with clearance
+        for dx in range(-3, 4):
+            for dy in range(-3, 4):
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < MAP_WIDTH and 0 <= ny < MAP_HEIGHT:
+                    points.append((nx, ny))
+                    map_array[ny, nx] = 1
                 
 
     # Connect nearby points
