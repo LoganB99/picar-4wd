@@ -208,12 +208,12 @@ def a_star_search(map_array, start, goal):
 
     def proximity_penalty(cell):
         # Inverted penalty: higher when closer to obstacles
-        distance = obstacle_distance[cell[1], cell[0]]
+        distance = obstacle_distance[int(cell[1]), int(cell[0])]
         penalty = (max_distance - distance) / max_distance
         return penalty * penalty_weight  # Scale by a weight factor
 
     # Penalty weight for proximity influence
-    penalty_weight = 10  # Tune this value as needed
+    penalty_weight = 2  # Tune this value as needed
 
     # Maintain an open set of nodes to explore. Lowest f-score is explored first
     open_set = queue.PriorityQueue()
@@ -243,7 +243,7 @@ def a_star_search(map_array, start, goal):
 
         for neighbor in neighbors:
             if 0 <= neighbor[0] < map_array.shape[1] and 0 <= neighbor[1] < map_array.shape[0]:
-                if map_array[neighbor[1], neighbor[0]] == 1:  # Obstacle
+                if map_array[int(neighbor[1]), int(neighbor[0])] == 1:  # Obstacle
                     continue
                 
                 # Add proximity penalty to the g_score
@@ -269,7 +269,7 @@ def scan_data_to_map():
         
     # Scan left to right and collect points
     print("Scanning left to right...")
-    clearance = 8 
+    clearance = 5 
     for angle in ANGLES_TO_SCAN:
         distance = fc.get_distance_at(angle)
         if distance > 0:  # Only record valid measurements
