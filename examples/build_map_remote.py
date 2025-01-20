@@ -7,6 +7,7 @@ import picar_4wd as fc
 import queue
 import random
 import sys
+from scipy.ndimage import distance_transform_edt
 
 # Map dimensions in cm
 MAP_WIDTH = 600  
@@ -197,34 +198,41 @@ def connect_points(map_array, x1, y1, x2, y2):
     map_array[int(y2), int(x2)] = 1
 
 def a_star_search(map_array, start, goal):
-    global direction
     def heuristic(a, b):
+        # Standard Euclidean distance
         return math.sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)
-    # maintain an open set of nodes to explore. lowest f-score is explored first
+
+    # Calculate proximity to obstacles
+    obstacle_distance = distance_transform_edt(1 - map_array)
+    max_distance = np.max(obstacle_distance)
+
+    def proximity_penalty(cell):
+        # Inverted penalty: higher when closer to obstacles
+        distance = obstacle_distance[cell[1], cell[0]]
+        penalty = (max_distance - distance) / max_distance
+        return penalty * penalty_weight  # Scale by a weight factor
+
+    # Penalty weight for proximity influence
+    penalty_weight = 10  # Tune this value as needed
+
+    # Maintain an open set of nodes to explore. Lowest f-score is explored first
     open_set = queue.PriorityQueue()
     open_set.put((0, start))
     came_from = {}
-    # g-score is the cost from 
+
     g_score = {start: 0}
     f_score = {start: heuristic(start, goal)}
 
     while not open_set.empty():
         current = open_set.get()[1]
         if current == goal:
-            # reconstruct path
-            # initially empty path
+            # Reconstruct path
             path = []
-            # while the goal node is in the came_from dictionary
             while current in came_from:
-                # add the current node to the path
                 path.append(current)
-                # set the current node to the node that came before it
                 current = came_from[current]
-            # no more current nodes, add the start node
             path.append(start)
-            # reverse the path to get the correct order
             path.reverse()
-            # return the path
             return path
         
         # Get neighbors
@@ -234,16 +242,19 @@ def a_star_search(map_array, start, goal):
         ]
 
         for neighbor in neighbors:
-            tentative_g_score = g_score[current] + 1
-            if 0 <= neighbor[0] < len(map_array) and 0 <= neighbor[1] < len(map_array[0]):
-                if map_array[int(neighbor[1])][int(neighbor[0])] == 1:
+            if 0 <= neighbor[0] < map_array.shape[1] and 0 <= neighbor[1] < map_array.shape[0]:
+                if map_array[neighbor[1], neighbor[0]] == 1:  # Obstacle
                     continue
+                
+                # Add proximity penalty to the g_score
+                tentative_g_score = g_score[current] + 1 + proximity_penalty(neighbor)
+
                 if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
                     came_from[neighbor] = current
                     g_score[neighbor] = tentative_g_score
                     f_score[neighbor] = tentative_g_score + heuristic(neighbor, goal)
-                    # lowest f-score is highest priority
                     open_set.put((f_score[neighbor], neighbor))
+    
     print("No path found")
     return None
 
