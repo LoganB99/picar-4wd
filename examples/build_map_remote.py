@@ -304,7 +304,7 @@ def scan_data_to_map():
 def main():
     global detect, car_x, car_y
     detection_queue = queue.Queue()
-    detect = fc.Detect(detection_queue=detection_queue, enable_edgetpu=False, num_threads = 4)
+    detect = fc.Detect(detection_queue=detection_queue, enable_edgetpu=False, num_threads = 1, enable_preview=False)
     detect.start()
     print("Starting autonomous navigation...")
     
