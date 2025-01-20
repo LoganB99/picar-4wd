@@ -319,8 +319,8 @@ def main():
     forward_distance = int(sys.argv[1])
     left_or_right_distance = int(sys.argv[2])
     
-    goal_x = car_x + forward_distance
-    goal_y = car_y + left_or_right_distance
+    goal_x = car_x + left_or_right_distance
+    goal_y = car_y + forward_distance
 
     print(f"Goal: {goal_x}, {goal_y}")
 

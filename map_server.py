@@ -117,8 +117,8 @@ def update_visualization():
 def set_goal():
     global goal_x, goal_y
     data = request.json
-    goal_x = data['x']
-    goal_y = data['y']
+    goal_x = data['goal_x']
+    goal_y = data['goal_y']
     return {'status': 'success'}
 
 @app.route('/update_car_position', methods=['POST'])
