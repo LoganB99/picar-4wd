@@ -18,7 +18,7 @@ CAR_START_Y = MAP_HEIGHT // 2
 # Scanning parameters
 SCAN_START_ANGLE = -90
 SCAN_END_ANGLE = 90
-SCAN_ANGLE_STEP = 10
+SCAN_ANGLE_STEP = 8
 ANGLES_TO_SCAN = list(range(SCAN_START_ANGLE, SCAN_END_ANGLE, SCAN_ANGLE_STEP))
 
 POWER = 10  # Set car POWER to 10
@@ -296,7 +296,7 @@ def scan_data_to_map():
         
     # Scan left to right and collect points
     print("Scanning left to right...")
-    clearance = 5 
+    clearance = 8
     for angle in ANGLES_TO_SCAN:
         distance = fc.get_distance_at(angle)
         if distance > 0:  # Only record valid measurements
