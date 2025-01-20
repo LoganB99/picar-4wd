@@ -346,7 +346,7 @@ def main():
     
     steps_before_rescan = 10
     while True:
-        break
+        continue
         # Check if an obstacle is detected
         # if not detection_queue.empty():
         #     detection_result = detection_queue.get()

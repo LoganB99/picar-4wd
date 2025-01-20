@@ -11,8 +11,8 @@ import threading
 app = Flask(__name__)
 
 # Map dimensions in cm
-MAP_WIDTH = 200  
-MAP_HEIGHT = 100
+MAP_WIDTH = 600  
+MAP_HEIGHT = 600
 CAR_START_X = MAP_WIDTH // 2  # Car starts at middle bottom
 CAR_START_Y = 0
 
@@ -23,6 +23,7 @@ MAX_POINT_DISTANCE = 10 # Maximum distance in cm to connect points
 PLOT_WIDTH = 10
 PLOT_HEIGHT = 6
 CAR_MARKER_SIZE = 10
+GOAL_MARKER_SIZE = 10
 
 # Initialize empty map and visualization
 map_array = np.zeros((MAP_HEIGHT, MAP_WIDTH))
@@ -34,6 +35,9 @@ map_lock = threading.Lock()
 # Car position tracking
 car_x = CAR_START_X
 car_y = CAR_START_Y
+
+goal_x = CAR_START_X
+goal_y = CAR_START_Y
 
 def init_visualization():
     pass
@@ -87,16 +91,20 @@ def connect_points(map_array, x1, y1, x2, y2):
 def update_visualization():
     # Acquire lock before updating visualization
     with map_lock:
+        x_min = max(0, car_x - 100)
+        x_max = min(MAP_WIDTH, car_x + 100)
+        y_min = max(0, car_y - 100)
+        y_max = min(MAP_HEIGHT, car_y + 100)
+        local_map_array = map_array[y_min:y_max, x_min:x_max]
         plt.clf()
-        plt.imshow(map_array, origin='lower', cmap='binary')
+        plt.imshow(local_map_array, extent=[x_min, x_max, y_min, y_max], origin='lower', cmap='binary')
         plt.title('Environment Map')
         plt.xlabel('X Position (cm)')
         plt.ylabel('Y Position (cm)')
         
         plt.grid(True, linestyle='--', alpha=0.7)
-        plt.axhline(y=CAR_START_Y, color='r', linestyle='-', alpha=0.5)
-        plt.axvline(x=CAR_START_X, color='r', linestyle='-', alpha=0.5)
         plt.plot(car_x, car_y, 'r^', markersize=CAR_MARKER_SIZE, label='Car')
+        plt.plot(goal_x, goal_y, 'g^', markersize=GOAL_MARKER_SIZE, label='Goal')
         plt.legend()
         
         # Save plot to bytes buffer
@@ -104,6 +112,14 @@ def update_visualization():
         plt.savefig(buf, format='png', bbox_inches='tight')
         buf.seek(0)
         return buf
+
+@app.route('/set_goal', methods=['POST'])
+def set_goal():
+    global goal_x, goal_y
+    data = request.json
+    goal_x = data['x']
+    goal_y = data['y']
+    return {'status': 'success'}
 
 @app.route('/update_car_position', methods=['POST'])
 def update_car_position():
