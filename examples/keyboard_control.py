@@ -59,6 +59,11 @@ def Keyborad_control():
             turn_left_90_deg()
         elif key == 'r':
             turn_right_90_deg()
+        elif key == 't':
+            print("Moving forward for half a second")
+            fc.forward(forward_speed)
+            time.sleep(0.5)
+            fc.stop()
         else:
             fc.stop()
         if key == 'q':

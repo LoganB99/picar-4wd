@@ -385,6 +385,8 @@ def main():
 
 
         travel_steps = 0
+        print("current_path_index is ", current_path_index)
+        print("len(path) is ", len(path))
         if current_path_index < len(path) and travel_steps < 10:
             next_point = path[current_path_index]
             print("next_point is ", next_point)
