@@ -91,10 +91,10 @@ def connect_points(map_array, x1, y1, x2, y2):
 def update_visualization():
     # Acquire lock before updating visualization
     with map_lock:
-        x_min = max(0, car_x - 100)
-        x_max = min(MAP_WIDTH, car_x + 100)
-        y_min = max(0, car_y - 100)
-        y_max = min(MAP_HEIGHT, car_y + 100)
+        x_min = int(max(0, car_x - 100))
+        x_max = int(min(MAP_WIDTH, car_x + 100))
+        y_min = int(max(0, car_y - 100))
+        y_max = int(min(MAP_HEIGHT, car_y + 100))
         print(f"x_min: {x_min}, x_max: {x_max}, y_min: {y_min}, y_max: {y_max}")
         local_map_array = map_array[y_min:y_max, x_min:x_max]
         plt.clf()

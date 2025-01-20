@@ -351,7 +351,13 @@ def main():
     iterations = 0
     while True:
         print("Starting iteration ", iterations)
+        print("car_x is ", car_x)
+        print("car_y is ", car_y)
+        print("goal_x is ", goal_x)
+        print("goal_y is ", goal_y)
         iterations = iterations + 1
+        if iterations > 20:
+            break
         # Check if car is within 5 cm of the goal
         if abs(car_x - goal_x) <= 5 and abs(car_y - goal_y) <= 5:
             print("Goal reached!")
@@ -384,29 +390,30 @@ def main():
             dir_change = (int(next_point[0] - car_x), int(next_point[1] - car_y))
             current_path_index += 1
             print("dir_change is ", dir_change)
+            print(" the next dir change is ", (int(path[current_path_index][0] - next_point[0]), int(path[current_path_index][1] - next_point[1])))
             while current_path_index < len(path) and dir_change == (int(path[current_path_index][0] - next_point[0]), int(path[current_path_index][1] - next_point[1])) and travel_steps < 10:
+                
                 next_point = path[current_path_index]
-                print("next_point is ", next_point)
-                print("path[current_path_index] is ", path[current_path_index])
+                
                 current_path_index += 1
                 travel_steps += 1
             print(f"Moving to next point: {next_point}")
             if dir_change[0] == dir_change[1] and dir_change[0] == 1:
-                turn_and_move('NE', .3 * travel_steps)
+                turn_and_move('NE', .22 * travel_steps)
             elif dir_change[0] == dir_change[1] and dir_change[0] == -1:
-                turn_and_move('SW', .3 * travel_steps)
+                turn_and_move('SW', .22 * travel_steps)
             elif dir_change[0] == 0 and dir_change[1] == 1:
-                turn_and_move('N', .3 * travel_steps)
+                turn_and_move('N', .22 * travel_steps)
             elif dir_change[0] == 0 and dir_change[1] == -1:
-                turn_and_move('S', .3 * travel_steps)
+                turn_and_move('S', .22 * travel_steps)
             elif dir_change[0] == 1 and dir_change[1] == 0:
-                turn_and_move('E', .3 * travel_steps)
+                turn_and_move('E', .22 * travel_steps)
             elif dir_change[0] == -1 and dir_change[1] == 0:
-                turn_and_move('W', .3 * travel_steps)
+                turn_and_move('W', .22 * travel_steps)
             elif dir_change[0] == 1 and dir_change[1] == -1:
-                turn_and_move('SE', .3 * travel_steps)
+                turn_and_move('SE', .22 * travel_steps)
             elif dir_change[0] == -1 and dir_change[1] == 1:
-                turn_and_move('NW', .3 * travel_steps)
+                turn_and_move('NW', .22 * travel_steps)
 
 
         
