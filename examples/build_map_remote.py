@@ -486,12 +486,13 @@ def main():
                 turn_and_move('NW', distance)
 
         # fc.stop()
-        scan_data_to_map()
+        if iterations % 10 == 0:
+            scan_data_to_map()
 
-        path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
-        current_path_index = 0
-        print(path)
-        print(direction)
+            path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
+            current_path_index = 0
+            print(path)
+            print(direction)
 
         # scan_data_to_map()
 
