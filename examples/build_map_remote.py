@@ -79,9 +79,9 @@ def turn_and_move(cardinal_direction, distance):
     direction = cardinal_direction
     
     # Calculate duration based on speed
-    speed = 43  # Speed in cm/s
+    speed = 40  # Speed in cm/s
     duration = distance / speed
-    print(duration) 
+    
     # Move forward
     fc.forward(POWER)
     time.sleep(duration)
@@ -377,48 +377,65 @@ def main():
         #             print("Stop sign detected")
 
 
-        travel_steps = 0
-        print("current_path_index is ", current_path_index)
-        print("len(path) is ", len(path))
-        if current_path_index < len(path) and travel_steps < 10:
+        travel_steps = 1  # ensure we move at least one step
+        print("current_path_index is", current_path_index)
+        print("len(path) is", len(path))
+
+        if current_path_index < len(path):
             next_point = path[current_path_index]
-            print("next_point is ", next_point)
-            dir_change = (int(next_point[0] - car_x), int(next_point[1] - car_y))
-            current_path_index += 1
-            print("dir_change is ", dir_change)
-            print(" the next dir change is ", (int(path[current_path_index][0] - next_point[0]), int(path[current_path_index][1] - next_point[1])))
-            while current_path_index < len(path) and dir_change == (int(path[current_path_index][0] - next_point[0]), int(path[current_path_index][1] - next_point[1])) and travel_steps < 10:
-                
-                next_point = path[current_path_index]
-                
-                current_path_index += 1
-                travel_steps += 1
-            print(f"Moving to next point: {next_point}")
-            distance = math.sqrt(dir_change[0]**2 + dir_change[1]**2) * travel_steps
-            if dir_change[0] == dir_change[1] and dir_change[0] == 1:
+            # Direction from the car's current position to the first point
+            dir_change = (
+                int(next_point[0] - car_x),
+                int(next_point[1] - car_y)
+            )
+            print("next_point is", next_point)
+            print("dir_change is", dir_change)
+
+            # Try to continue moving in the same direction up to 10 total steps
+            # Check future points in path to see if they continue the same direction
+            while (
+                current_path_index + 1 < len(path) and
+                travel_steps < 10
+            ):
+                # Direction from path[current_path_index] to path[current_path_index+1]
+                next_dir = (
+                    int(path[current_path_index + 1][0] - path[current_path_index][0]),
+                    int(path[current_path_index + 1][1] - path[current_path_index][1])
+                )
+                if next_dir == dir_change:
+                    current_path_index += 1
+                    travel_steps += 1
+                else:
+                    break
+
+            # After the loop, current_path_index points to the last spot in this direction.
+            # 'next_point' should match that final position.
+            next_point = path[current_path_index]
+
+            print(f"Moving {travel_steps} step(s) in direction {dir_change}, ending at {next_point}")
+
+            # Compute distance for all traveled steps in that direction
+            step_dist = math.sqrt(dir_change[0]**2 + dir_change[1]**2)
+            distance = step_dist * travel_steps
+
+            # Then move the car in the correct direction
+            if dir_change == (1, 1):
                 turn_and_move('NE', distance)
-            elif dir_change[0] == dir_change[1] and dir_change[0] == -1:
+            elif dir_change == (-1, -1):
                 turn_and_move('SW', distance)
-            elif dir_change[0] == 0 and dir_change[1] == 1:
+            elif dir_change == (0, 1):
                 turn_and_move('N', distance)
-            elif dir_change[0] == 0 and dir_change[1] == -1:
+            elif dir_change == (0, -1):
                 turn_and_move('S', distance)
-            elif dir_change[0] == 1 and dir_change[1] == 0:
+            elif dir_change == (1, 0):
                 turn_and_move('E', distance)
-            elif dir_change[0] == -1 and dir_change[1] == 0:
+            elif dir_change == (-1, 0):
                 turn_and_move('W', distance)
-            elif dir_change[0] == 1 and dir_change[1] == -1:
+            elif dir_change == (1, -1):
                 turn_and_move('SE', distance)
-            elif dir_change[0] == -1 and dir_change[1] == 1:
+            elif dir_change == (-1, 1):
                 turn_and_move('NW', distance)
 
-
-        
-
-        
-            
-        
-        
         # fc.stop()
         # scan_data_to_map()
 
