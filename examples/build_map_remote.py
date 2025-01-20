@@ -484,21 +484,21 @@ def main():
 
             # Then move the car in the correct direction
             if dir_change == (1, 1):
-                turn_and_move('NE', distance)
+                turn_and_move('NE', distance*1.1)
             elif dir_change == (-1, -1):
-                turn_and_move('SW', distance)
+                turn_and_move('SW', distance*1.1)
             elif dir_change == (0, 1):
-                turn_and_move('N', distance)
+                turn_and_move('N', distance*1.1)
             elif dir_change == (0, -1):
-                turn_and_move('S', distance)
+                turn_and_move('S', distance*1.1)
             elif dir_change == (1, 0):
-                turn_and_move('E', distance)
+                turn_and_move('E', distance*1.1)
             elif dir_change == (-1, 0):
-                turn_and_move('W', distance)
+                turn_and_move('W', distance*1.1)
             elif dir_change == (1, -1):
-                turn_and_move('SE', distance)
+                turn_and_move('SE', distance*1.1)
             elif dir_change == (-1, 1):
-                turn_and_move('NW', distance)
+                turn_and_move('NW', distance*1.1)
 
         # fc.stop()
         if iterations % 10 == 0 or NEED_TO_RESCAN:
