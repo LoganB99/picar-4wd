@@ -442,6 +442,9 @@ def main():
             )
             print("next_point is", next_point)
             print("dir_change is", dir_change)
+            if dir_change[0] > 1 or dir_change[1] > 1:
+                print("dir_change is too big")
+                break
 
             # Try to continue moving in the same direction up to 30 total steps
             # Check future points in path to see if they continue the same direction
