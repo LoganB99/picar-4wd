@@ -20,8 +20,8 @@ SCAN_END_ANGLE = 90
 SCAN_ANGLE_STEP = 10
 ANGLES_TO_SCAN = list(range(SCAN_START_ANGLE, SCAN_END_ANGLE, SCAN_ANGLE_STEP))
 
-SPEED = 10  # Set car speed to 10
-TURN_SPEED = 50  # Set turn speed to 50
+POWER = 10  # Set car POWER to 10
+TURN_POWER = 50  # Set turn POWER to 50
 SCAN_REF = 35
 GRAYSCALE_REF = 400
 FORWARD_SCAN_RANGE = slice(3,7)  # Indices for forward-facing sensors
@@ -68,9 +68,9 @@ def turn_and_move(cardinal_direction, duration):
 
     print(f"Turning {angle} degrees and moving")
     if angle > 0:
-        fc.turn_right(TURN_SPEED)
+        fc.turn_right(TURN_POWER)
     elif angle < 0:
-        fc.turn_left(TURN_SPEED)
+        fc.turn_left(TURN_POWER)
     if angle != 0:
         time.sleep(abs(angle) / 90 * TURN_SLEEP)
     fc.stop()
@@ -79,7 +79,7 @@ def turn_and_move(cardinal_direction, duration):
     direction = cardinal_direction
     
     # Move forward
-    fc.forward(SPEED)
+    fc.forward(POWER)
     time.sleep(duration)
     
     # Update car position while moving
@@ -105,7 +105,7 @@ def try_random_unstuck():
     """Randomly try to unstuck with 20% chance"""
     if random.random() < 0.2:
         print("\nTrying random unstuck maneuver")
-        fc.turn_right(TURN_SPEED)
+        fc.turn_right(TURN_POWER)
         time.sleep(0.1)
         fc.stop()
         return True
@@ -115,8 +115,8 @@ def update_car_position(moving=False, duration=0):
     global car_x, car_y
     elapsed_time = duration
     
-    # Get current speed in mm/s and convert to cm/s
-    speed = fc.speed_val() / 10 if moving else 0
+    # Hardcoded speed in cm/s
+    speed = 31.425 if moving else 0
     print(speed, "cm/s")
     print(duration)
     # Calculate distance traveled in cm
@@ -307,7 +307,6 @@ def scan_data_to_map():
 
 def main():
     global detect, car_x, car_y
-    fc.start_speed_thread()
     detection_queue = queue.Queue()
     detect = fc.Detect(detection_queue=detection_queue, enable_edgetpu=False, num_threads = 4)
     detect.start()
@@ -437,6 +436,4 @@ if __name__ == "__main__":
         fc.stop()
         if detect:
             detect.stop()
-        fc.left_rear_speed.deinit()
-        fc.right_rear_speed.deinit()
         print('Program stopped')
