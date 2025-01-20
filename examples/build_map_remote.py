@@ -236,7 +236,6 @@ def a_star_search(map_array, start, goal):
         for neighbor in neighbors:
             tentative_g_score = g_score[current] + 1
             if 0 <= neighbor[0] < len(map_array) and 0 <= neighbor[1] < len(map_array[0]):
-                print(neighbor[1],neighbor[0])
                 if map_array[int(neighbor[1])][int(neighbor[0])] == 1:
                     continue
                 if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
@@ -266,17 +265,16 @@ def scan_data_to_map():
             for d in range(int(distance)):
                 x, y = get_xy_coords(angle, d)
                 if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
-                    map_array[y, x] = 0
+                    map_array[int(y), int(x)] = 0
             
             # Get obstacle point coordinates once
             x, y = get_xy_coords(angle, distance)
-            # Mark the obstacle point with clearance
-            for dx in range(-3, 4):
-                for dy in range(-3, 4):
-                    nx, ny = x + dx, y + dy
-                    if 0 <= nx < MAP_WIDTH and 0 <= ny < MAP_HEIGHT:
-                        points.append((nx, ny))
-                        map_array[ny, nx] = 1
+            # Create a grid of clearance points around the obstacle
+            x_indices = np.clip(np.arange(int(x) - clearance, int(x) + clearance + 1), 0, MAP_WIDTH - 1)
+            y_indices = np.clip(np.arange(int(y) - clearance, int(y) + clearance + 1), 0, MAP_HEIGHT - 1)
+
+            xx, yy = np.meshgrid(x_indices, y_indices)
+            map_array[yy, xx] = 1  # Mark clearance points
 
     print("Scanning right to left...")
     for angle in reversed(ANGLES_TO_SCAN):
@@ -286,17 +284,16 @@ def scan_data_to_map():
             for d in range(int(distance)):
                 x, y = get_xy_coords(angle, d)
                 if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
-                    map_array[y, x] = 0
+                    map_array[int(y), int(x)] = 0
             
             # Get obstacle point coordinates once
             x, y = get_xy_coords(angle, distance)
-            # Mark the obstacle point with clearance
-            for dx in range(-3, 4):
-                for dy in range(-3, 4):
-                    nx, ny = x + dx, y + dy
-                    if 0 <= nx < MAP_WIDTH and 0 <= ny < MAP_HEIGHT:
-                        points.append((nx, ny))
-                        map_array[ny, nx] = 1
+            # Create a grid of clearance points around the obstacle
+            x_indices = np.clip(np.arange(int(x) - clearance, int(x) + clearance + 1), 0, MAP_WIDTH - 1)
+            y_indices = np.clip(np.arange(int(y) - clearance, int(y) + clearance + 1), 0, MAP_HEIGHT - 1)
+
+            xx, yy = np.meshgrid(x_indices, y_indices)
+            map_array[yy, xx] = 1  # Mark clearance points
                     
 
     # Connect nearby points
