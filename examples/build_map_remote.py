@@ -198,6 +198,7 @@ def connect_points(map_array, x1, y1, x2, y2):
     map_array[int(y2), int(x2)] = 1
 
 def a_star_search(map_array, start, goal):
+    threshold = 10
     def heuristic(a, b):
         # Standard Euclidean distance
         return math.sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)
@@ -209,7 +210,10 @@ def a_star_search(map_array, start, goal):
     def proximity_penalty(cell):
         # Inverted penalty: higher when closer to obstacles
         distance = obstacle_distance[int(cell[1]), int(cell[0])]
-        penalty = (max_distance - distance) / max_distance
+        if distance <= threshold:
+            penalty = (max_distance - distance) / max_distance
+        else:
+            penalty = 0
         return penalty * penalty_weight  # Scale by a weight factor
 
     # Penalty weight for proximity influence
