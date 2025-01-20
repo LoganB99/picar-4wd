@@ -225,17 +225,17 @@ def a_star_search(map_array, start, goal):
     obstacle_distance = distance_transform_edt(1 - map_array)
     max_distance = int(np.max(obstacle_distance))
 
-    def proximity_penalty(cell):
-        # Inverted penalty: higher when closer to obstacles
-        distance = int(obstacle_distance[int(cell[1]), int(cell[0])])
-        if distance <= threshold:
-            penalty = int((max_distance - distance) / max_distance)
-        else:
-            penalty = 0
-        return penalty * penalty_weight  # Scale by a weight factor
+    # def proximity_penalty(cell):
+    #     # Inverted penalty: higher when closer to obstacles
+    #     distance = int(obstacle_distance[int(cell[1]), int(cell[0])])
+    #     if distance <= threshold:
+    #         penalty = int((max_distance - distance) / max_distance)
+    #     else:
+    #         penalty = 0
+    #     return penalty * penalty_weight  # Scale by a weight factor
 
-    # Penalty weight for proximity influence
-    penalty_weight = 2  # Tune this value as needed
+    # # Penalty weight for proximity influence
+    # penalty_weight = 2  # Tune this value as needed
 
     # Maintain an open set of nodes to explore. Lowest f-score is explored first
     open_set = queue.PriorityQueue()
@@ -249,7 +249,7 @@ def a_star_search(map_array, start, goal):
 
     while not open_set.empty():
         # Check for timeout
-        if time.time() - start_time > 2:
+        if time.time() - start_time > 5:
             print("Search timed out")
             return None
 
@@ -275,8 +275,8 @@ def a_star_search(map_array, start, goal):
                 if map_array[int(neighbor[1]), int(neighbor[0])] == 1:  # Obstacle
                     continue
                 
-                # Add proximity penalty to the g_score
-                tentative_g_score = int(g_score[current] + 1 + proximity_penalty(neighbor))
+                
+                tentative_g_score = int(g_score[current] + 1)
 
                 if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
                     came_from[neighbor] = current
@@ -489,21 +489,21 @@ def main():
 
             # Then move the car in the correct direction
             if dir_change == (1, 1):
-                turn_and_move('NE', distance*1.1)
+                turn_and_move('NE', int(distance*1.1))
             elif dir_change == (-1, -1):
-                turn_and_move('SW', distance*1.1)
+                turn_and_move('SW', int(distance*1.1))
             elif dir_change == (0, 1):
-                turn_and_move('N', distance*1.1)
+                turn_and_move('N', int(distance*1.1))
             elif dir_change == (0, -1):
-                turn_and_move('S', distance*1.1)
+                turn_and_move('S', int(distance*1.1))
             elif dir_change == (1, 0):
-                turn_and_move('E', distance*1.1)
+                turn_and_move('E', int(distance*1.1))
             elif dir_change == (-1, 0):
-                turn_and_move('W', distance*1.1)
+                turn_and_move('W', int(distance*1.1))
             elif dir_change == (1, -1):
-                turn_and_move('SE', distance*1.1)
+                turn_and_move('SE', int(distance*1.1))
             elif dir_change == (-1, 1):
-                turn_and_move('NW', distance*1.1)
+                turn_and_move('NW', int(distance*1.1))
         print("direction is ", direction)
         #print travel steps remaining
         print("travel steps remaining: ", len(path) - current_path_index)
