@@ -117,10 +117,11 @@ def update_car_position(moving=False, duration=0):
     
     # Get current speed in mm/s and convert to cm/s
     speed = fc.speed_val() / 10 if moving else 0
-    
+    print(speed, "cm/s")
+    print(duration)
     # Calculate distance traveled in cm
     distance = speed * elapsed_time
-    
+    print(distance) 
     # Update position based on direction
     if direction == 'N':
         car_y += distance
@@ -403,7 +404,9 @@ def main():
             elif dir_change[0] == dir_change[1] and dir_change[0] == -1:
                 turn_and_move('SW', .22 * travel_steps)
             elif dir_change[0] == 0 and dir_change[1] == 1:
+                print(travel_steps)
                 turn_and_move('N', .22 * travel_steps)
+                break
             elif dir_change[0] == 0 and dir_change[1] == -1:
                 turn_and_move('S', .22 * travel_steps)
             elif dir_change[0] == 1 and dir_change[1] == 0:
