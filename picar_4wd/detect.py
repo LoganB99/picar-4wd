@@ -69,9 +69,8 @@ class Detect:
                     end_time = time.time()
                     fps = fps_avg_frame_count / (end_time - start_time)
                     start_time = time.time()
-                    logging.info(f"FPS: {fps:.2f}")
 
-                time.sleep(0.2)
+                time.sleep(1.0)
 
         except Exception as e:
             logging.error(f"An error occurred: {e}")

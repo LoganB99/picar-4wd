@@ -72,6 +72,7 @@ def turn_and_move(cardinal_direction, distance):
     elif angle < 0:
         fc.turn_left(TURN_POWER)
     if angle != 0:
+        print("turning for ", abs(angle) / 90 * TURN_SLEEP, " seconds")
         time.sleep(abs(angle) / 90 * TURN_SLEEP)
     fc.stop()
     
