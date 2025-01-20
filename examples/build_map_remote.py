@@ -352,7 +352,7 @@ def scan_data_to_map():
         time.sleep(1)
 
 def main():
-    global detect, car_x, car_y
+    global detect, car_x, car_y, NEED_TO_RESCAN, map_array
     detection_queue = queue.Queue()
     detect = fc.Detect(detection_queue=detection_queue, enable_edgetpu=False, num_threads = 1, enable_preview=False)
     detect.start()
