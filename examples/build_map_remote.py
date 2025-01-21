@@ -145,18 +145,8 @@ def update_car_position(distance):
 
 def get_xy_coords(angle, distance):
     global car_x, car_y, direction
-    car_heading = 0
-    if direction == 'N':
-        car_heading = 0
-    elif direction == 'E':
-        car_heading = 90
-    elif direction == 'S':
-        car_heading = 180
-    elif direction == 'W':
-        car_heading = 270
-    total_angle = angle + car_heading
     # Convert angle from degrees to radians for math functions
-    angle_rad = math.radians(total_angle)
+    angle_rad = math.radians(angle)
     # Get x,y relative to car position
     x = distance * math.sin(angle_rad)
     y = distance * math.cos(angle_rad)
@@ -395,76 +385,78 @@ def main():
         #             print("Stop sign detected")
 
 
-        travel_steps = 1  # ensure we move at least one step
-        current_path_index += 1
+        # travel_steps = 1  # ensure we move at least one step
+        # current_path_index += 1
 
-        if current_path_index < len(path):
-            next_point = path[current_path_index]
-            # Direction from the car's current position to the first point
-            dir_change = (
-                int(next_point[0] - car_x),
-                int(next_point[1] - car_y)
-            )
-            print("next_point is", next_point)
-            print("dir_change is", dir_change)
-            if dir_change[0] > 1 or dir_change[1] > 1:
-                print("dir_change is too big")
-                break
+        # if current_path_index < len(path):
+        #     next_point = path[current_path_index]
+        #     # Direction from the car's current position to the first point
+        #     dir_change = (
+        #         int(next_point[0] - car_x),
+        #         int(next_point[1] - car_y)
+        #     )
+        #     print("next_point is", next_point)
+        #     print("dir_change is", dir_change)
+        #     if dir_change[0] > 1 or dir_change[1] > 1:
+        #         print("dir_change is too big")
+        #         break
 
-            # Try to continue moving in the same direction up to 30 total steps
-            # Check future points in path to see if they continue the same direction
-            while (
-                current_path_index + 1 < len(path) and
-                travel_steps < 10
-            ):
-                # Direction from path[current_path_index] to path[current_path_index+1]
-                next_dir = (
-                    int(path[current_path_index + 1][0] - path[current_path_index][0]),
-                    int(path[current_path_index + 1][1] - path[current_path_index][1])
-                )
-                if next_dir == dir_change:
-                    current_path_index += 1
-                    travel_steps += 1
-                else:
-                    break
+        #     # Try to continue moving in the same direction up to 30 total steps
+        #     # Check future points in path to see if they continue the same direction
+        #     while (
+        #         current_path_index + 1 < len(path) and
+        #         travel_steps < 10
+        #     ):
+        #         # Direction from path[current_path_index] to path[current_path_index+1]
+        #         next_dir = (
+        #             int(path[current_path_index + 1][0] - path[current_path_index][0]),
+        #             int(path[current_path_index + 1][1] - path[current_path_index][1])
+        #         )
+        #         if next_dir == dir_change:
+        #             current_path_index += 1
+        #             travel_steps += 1
+        #         else:
+        #             break
 
-            # After the loop, current_path_index points to the last spot in this direction.
-            # 'next_point' should match that final position.
-            next_point = path[current_path_index]
+        #     # After the loop, current_path_index points to the last spot in this direction.
+        #     # 'next_point' should match that final position.
+        #     next_point = path[current_path_index]
 
-            print(f"Moving {travel_steps} step(s) in direction {dir_change}, ending at {next_point}")
+        #     print(f"Moving {travel_steps} step(s) in direction {dir_change}, ending at {next_point}")
 
-            # Compute distance for all traveled steps in that direction
-            step_dist = math.sqrt(dir_change[0]**2 + dir_change[1]**2)
-            distance = step_dist * travel_steps
+        #     # Compute distance for all traveled steps in that direction
+        #     step_dist = math.sqrt(dir_change[0]**2 + dir_change[1]**2)
+        #     distance = step_dist * travel_steps
 
-            # Then move the car in the correct direction
-            if dir_change == (0, 1):
-                turn_and_move('N', int(distance))
-            elif dir_change == (0, -1):
-                turn_and_move('S', int(distance))
-            elif dir_change == (1, 0):
-                turn_and_move('E', int(distance))
-            elif dir_change == (-1, 0):
-                turn_and_move('W', int(distance))
-        print("direction is ", direction)
-        #print travel steps remaining
-        print("travel steps remaining: ", len(path) - current_path_index)
-        # fc.stop()
-        if iterations % 10 == 0 or NEED_TO_RESCAN:
-            print("rescanning")
+        #     # Then move the car in the correct direction
+        #     if dir_change == (0, 1):
+        #         turn_and_move('N', int(distance))
+        #     elif dir_change == (0, -1):
+        #         turn_and_move('S', int(distance))
+        #     elif dir_change == (1, 0):
+        #         turn_and_move('E', int(distance))
+        #     elif dir_change == (-1, 0):
+        #         turn_and_move('W', int(distance))
+        # print("direction is ", direction)
+        # #print travel steps remaining
+        # print("travel steps remaining: ", len(path) - current_path_index)
+        # # fc.stop()
+        # if iterations % 10 == 0 or NEED_TO_RESCAN:
+        #     print("rescanning")
 
-            path = None
-            while path is None:
-                scan_data_to_map()
-                NEED_TO_RESCAN = False
-                path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
-                current_path_index = 0
-            print("car_x is ", car_x)
-            print("car_y is ", car_y)
-            print("goal_x is ", goal_x)
-            print("goal_y is ", goal_y)
-            print("direction is ", direction)
+        #     path = None
+        #     while path is None:
+        #         scan_data_to_map()
+        #         NEED_TO_RESCAN = False
+        #         path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
+        #         current_path_index = 0
+        #     print("car_x is ", car_x)
+        #     print("car_y is ", car_y)
+        #     print("goal_x is ", goal_x)
+        #     print("goal_y is ", goal_y)
+        #     print("direction is ", direction)
+        time.sleep(3)
+        scan_data_to_map()
             
 
         
