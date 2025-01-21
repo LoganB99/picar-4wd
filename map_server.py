@@ -42,51 +42,6 @@ goal_y = CAR_START_Y
 def init_visualization():
     pass
 
-def get_xy_coords(angle, distance):
-    # Convert angle from degrees to radians for math functions
-    angle_rad = math.radians(angle)
-    # Get x,y relative to car position
-    x = distance * math.sin(angle_rad)
-    y = distance * math.cos(angle_rad)
-    # Convert to map coordinates (car at current position)
-    map_x = int(car_x + x)
-    # Y coordinate starts from bottom now
-    map_y = int(car_y + y)
-    return (map_x, map_y)
-
-def connect_points(map_array, x1, y1, x2, y2):
-    # Get slope between points
-    if x2 - x1 == 0:  # Vertical line
-        slope = float('inf')
-    else:
-        slope = (y2 - y1) / (x2 - x1)
-    
-    # Draw line between points using Bresenham's algorithm
-    dx = abs(x2 - x1)
-    dy = abs(y2 - y1)
-    x, y = x1, y1
-    sx = 1 if x2 > x1 else -1
-    sy = 1 if y2 > y1 else -1
-    
-    if dx > dy:
-        err = dx / 2.0
-        while x != x2:
-            map_array[int(y), int(x)] = 1
-            err -= dy
-            if err < 0:
-                y += sy
-                err += dx
-            x += sx
-    else:
-        err = dy / 2.0
-        while y != y2:
-            map_array[int(y), int(x)] = 1
-            err -= dx
-            if err < 0:
-                x += sx
-                err += dy
-            y += sy
-    map_array[int(y2), int(x2)] = 1
 
 def update_visualization():
     # Acquire lock before updating visualization

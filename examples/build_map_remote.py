@@ -144,8 +144,19 @@ def update_car_position(distance):
         pass
 
 def get_xy_coords(angle, distance):
+    global car_x, car_y, direction
+    car_heading = 0
+    if direction == 'N':
+        car_heading = 0
+    elif direction == 'E':
+        car_heading = 90
+    elif direction == 'S':
+        car_heading = 180
+    elif direction == 'W':
+        car_heading = 270
+    total_angle = angle + car_heading
     # Convert angle from degrees to radians for math functions
-    angle_rad = math.radians(angle)
+    angle_rad = math.radians(total_angle)
     # Get x,y relative to car position
     x = distance * math.sin(angle_rad)
     y = distance * math.cos(angle_rad)
@@ -269,8 +280,8 @@ def scan_data_to_map():
             
             # Get obstacle point coordinates once
             x, y = get_xy_coords(angle, distance)
-            x_min, x_max = max(0, int(x) - SCAN_REF), min(MAP_WIDTH, int(x) + SCAN_REF)
-            y_min, y_max = max(0, int(y) - SCAN_REF), min(MAP_HEIGHT, int(y) + SCAN_REF)
+            x_min, x_max = max(0, int(x) - 15), min(MAP_WIDTH, int(x) + 15)
+            y_min, y_max = max(0, int(y) - 15), min(MAP_HEIGHT, int(y) + 15)
             map_array[y_min:y_max, x_min:x_max] = 1
 
 
