@@ -124,25 +124,25 @@ def update_car_position(distance):
     print(distance) 
     # Update position based on direction
     if direction == 'N':
-        car_y = math.ceil(car_y + distance)
+        car_y = car_y + distance
     elif direction == 'NE':
-        car_x = math.ceil(car_x + distance / math.sqrt(2))
-        car_y = math.ceil(car_y + distance / math.sqrt(2))
+        car_x = car_x + distance / math.sqrt(2)
+        car_y = car_y + distance / math.sqrt(2)
     elif direction == 'E':
-        car_x = math.ceil(car_x + distance)
+        car_x = car_x + distance
     elif direction == 'SE':
-        car_x = math.ceil(car_x + distance / math.sqrt(2))
-        car_y = math.ceil(car_y - distance / math.sqrt(2))
+        car_x = car_x + distance / math.sqrt(2)
+        car_y = car_y - distance / math.sqrt(2)
     elif direction == 'S':
-        car_y = math.ceil(car_y - distance)
+        car_y = car_y - distance
     elif direction == 'SW':
-        car_x = math.ceil(car_x - distance / math.sqrt(2))
-        car_y = math.ceil(car_y - distance / math.sqrt(2))
+        car_x = car_x - distance / math.sqrt(2)
+        car_y = car_y - distance / math.sqrt(2)
     elif direction == 'W':
-        car_x = math.ceil(car_x - distance)
+        car_x = car_x - distance
     elif direction == 'NW':
-        car_x = math.ceil(car_x - distance / math.sqrt(2))
-        car_y = math.ceil(car_y + distance / math.sqrt(2))
+        car_x = car_x - distance / math.sqrt(2)
+        car_y = car_y + distance / math.sqrt(2)
     
     print(f"Updated position - X: {car_x:.1f}, Y: {car_y:.1f}")
     
@@ -442,11 +442,6 @@ def main():
                 int(next_point[0] - car_x),
                 int(next_point[1] - car_y)
             )
-            # print("next_point is", next_point)
-            print("dir_change is", dir_change)
-            if abs(dir_change[0]) > 1 or abs(dir_change[1]) > 1:
-                print("dir_change is too big")
-                break
 
             # Try to continue moving in the same direction up to 30 total steps
             # Check future points in path to see if they continue the same direction
@@ -476,28 +471,28 @@ def main():
             distance = step_dist * travel_steps
 
             # Then move the car in the correct direction
-            if dir_change == (0, 1):
+            if dir_change[0] == 0 and dir_change[1] > 0:
                 print("want to move north")
                 turn_and_move('N', int(distance))
-            elif dir_change == (0, -1):
+            elif dir_change[0] == 0 and dir_change[1] < 0:
                 print("want to move south")
                 turn_and_move('S', int(distance))
-            elif dir_change == (1, 0):
+            elif dir_change[1] == 0 and dir_change[0] > 0:
                 print("want to move east")
                 turn_and_move('E', int(distance))
-            elif dir_change == (-1, 0):
+            elif dir_change[1] == 0 and dir_change[0] < 0:
                 print("want to move west")
                 turn_and_move('W', int(distance))
-            elif dir_change == (1, 1):
+            elif dir_change[0] > 0 and dir_change[1] > 0:
                 print("want to move northeast")
                 turn_and_move('NE', int(distance))
-            elif dir_change == (-1, 1):
+            elif dir_change[0] < 0 and dir_change[1] > 0:
                 print("want to move northwest")
                 turn_and_move('NW', int(distance))
-            elif dir_change == (1, -1):
+            elif dir_change[0] > 0 and dir_change[1] < 0:
                 print("want to move southeast")
                 turn_and_move('SE', int(distance))
-            elif dir_change == (-1, -1):
+            elif dir_change[0] < 0 and dir_change[1] < 0:
                 print("want to move southwest")
                 turn_and_move('SW', int(distance))
         # print("direction is ", direction)
