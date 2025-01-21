@@ -83,6 +83,11 @@ def turn_and_move(cardinal_direction, distance):
         fc.stop()
         update_car_position(distance)
     else:
+        print("obstacle detected")
+        fc.backward(POWER)
+        time.sleep(duration)
+        fc.stop()
+        update_car_position(-distance)
         NEED_TO_RESCAN = True
         
     # Update car position while moving
@@ -300,7 +305,6 @@ def scan_data_to_map():
                 for j in range(max(0, int(y) - radius), min(MAP_HEIGHT, int(y) + radius)):
                     if (i - x)**2 + (j - y)**2 <= radius**2:
                         map_array[j, i] = 1
-        time.sleep(0.1)
 
 
     # Connect nearby points
@@ -500,7 +504,7 @@ def main():
         #print travel steps remaining
         # print("travel steps remaining: ", len(path) - current_path_index)
         # fc.stop()
-        if iterations % 3 == 0 or NEED_TO_RESCAN:
+        if iterations % 10 == 0 or NEED_TO_RESCAN:
             print("rescanning")
             path = None
             while path is None:
