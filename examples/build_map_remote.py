@@ -477,7 +477,7 @@ def main():
             print("goal_x is ", goal_x)
             print("goal_y is ", goal_y)
             print("direction is ", direction)
-            break
+            
 
         
 
