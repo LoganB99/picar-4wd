@@ -10,8 +10,8 @@ import sys
 from scipy.ndimage import distance_transform_edt
 
 # Map dimensions in cm
-MAP_WIDTH = 600  
-MAP_HEIGHT = 600
+MAP_WIDTH = 300  
+MAP_HEIGHT = 0
 CAR_START_X = MAP_WIDTH // 2  # Car starts at middle bottom
 CAR_START_Y = MAP_HEIGHT // 2
 
@@ -83,22 +83,14 @@ def turn_and_move(cardinal_direction, distance):
     direction = cardinal_direction
     
     # Calculate duration based on speed
-    speed = 40  # Speed in cm/s
+    speed = 33  # Speed in cm/s
     duration = distance / speed
     
     # Move forward if path is clear
-    complete_scan = get_complete_scan()
-    if check_path_clear(complete_scan):
-        fc.forward(POWER)
-        time.sleep(duration)
-        fc.stop()
-        update_car_position(distance)
-    else:
-        fc.backward(POWER)
-        time.sleep(.5)
-        fc.stop()
-        update_car_position(-20)
-        NEED_TO_RESCAN = True
+    fc.forward(POWER)
+    time.sleep(duration)
+    fc.stop()
+    update_car_position(distance)
     # Update car position while moving
     
     
@@ -281,39 +273,32 @@ def scan_data_to_map():
         
     # Scan left to right and collect points
     print("Scanning left to right...")
-    clearance = 15
     for angle in ANGLES_TO_SCAN:
         distance = fc.get_distance_at(angle)
         if distance > 0:  # Only record valid measurements
             # Clear points along the ray until the obstacle
-            for d in range(int(distance-SCAN_REF)):
+            for d in range(int(distance)):
                 x, y = get_xy_coords(angle, d)
                 if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
                     map_array[int(y), int(x)] = 0
             
             # Get obstacle point coordinates once
-            x, y = get_xy_coords(angle, distance-SCAN_REF)
-            # Create a grid of clearance points around the obstacle
-            x_indices = np.clip(np.arange(int(x) - clearance, int(x) + clearance + 1), 0, MAP_WIDTH - 1)
-            y_indices = np.clip(np.arange(int(y) - clearance, int(y) + clearance + 1), 0, MAP_HEIGHT - 1)
+            x, y = get_xy_coords(angle, distance)
+            points.append((x, y))
 
-            xx, yy = np.meshgrid(x_indices, y_indices)
-            map_array[yy, xx] = 1  # Mark clearance points
-
-                    
 
     # Connect nearby points
-    #MAX_POINT_DISTANCE = 10
-    #for i in range(len(points)):
-    #    for j in range(i + 1, len(points)):
-    #        x1, y1 = points[i]
-    #        x2, y2 = points[j]
+    MAX_POINT_DISTANCE = 10
+    for i in range(len(points)):
+       for j in range(i + 1, len(points)):
+           x1, y1 = points[i]
+           x2, y2 = points[j]
             
-            # Calculate distance between points
-    #        dist = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+            Calculate distance between points
+           dist = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
             
-    #        if dist <= MAX_POINT_DISTANCE:
-    #            connect_points(map_array, x1, y1, x2, y2)
+           if dist <= MAX_POINT_DISTANCE:
+               connect_points(map_array, x1, y1, x2, y2)
     
     # Send processed map data to server
     try:

@@ -11,8 +11,8 @@ import threading
 app = Flask(__name__)
 
 # Map dimensions in cm
-MAP_WIDTH = 600  
-MAP_HEIGHT = 600
+MAP_WIDTH = 300  
+MAP_HEIGHT = 0
 CAR_START_X = MAP_WIDTH // 2  # Car starts at middle bottom
 CAR_START_Y = MAP_HEIGHT // 2
 
