@@ -124,25 +124,25 @@ def update_car_position(distance):
     print(distance) 
     # Update position based on direction
     if direction == 'N':
-        car_y += distance
+        car_y = math.ceil(car_y + distance)
     elif direction == 'NE':
-        car_x += distance / math.sqrt(2)
-        car_y += distance / math.sqrt(2)
+        car_x = math.ceil(car_x + distance / math.sqrt(2))
+        car_y = math.ceil(car_y + distance / math.sqrt(2))
     elif direction == 'E':
-        car_x += distance
+        car_x = math.ceil(car_x + distance)
     elif direction == 'SE':
-        car_x += distance / math.sqrt(2)
-        car_y -= distance / math.sqrt(2)
+        car_x = math.ceil(car_x + distance / math.sqrt(2))
+        car_y = math.ceil(car_y - distance / math.sqrt(2))
     elif direction == 'S':
-        car_y -= distance
+        car_y = math.ceil(car_y - distance)
     elif direction == 'SW':
-        car_x -= distance / math.sqrt(2)
-        car_y -= distance / math.sqrt(2)
+        car_x = math.ceil(car_x - distance / math.sqrt(2))
+        car_y = math.ceil(car_y - distance / math.sqrt(2))
     elif direction == 'W':
-        car_x -= distance
+        car_x = math.ceil(car_x - distance)
     elif direction == 'NW':
-        car_x -= distance / math.sqrt(2)
-        car_y += distance / math.sqrt(2)
+        car_x = math.ceil(car_x - distance / math.sqrt(2))
+        car_y = math.ceil(car_y + distance / math.sqrt(2))
     
     print(f"Updated position - X: {car_x:.1f}, Y: {car_y:.1f}")
     
@@ -472,7 +472,7 @@ def main():
             # print(f"Moving {travel_steps} step(s) in direction {dir_change}, ending at {next_point}")
 
             # Compute distance for all traveled steps in that direction
-            step_dist = int(math.sqrt(dir_change[0]**2 + dir_change[1]**2))
+            step_dist = math.sqrt(dir_change[0]**2 + dir_change[1]**2)
             distance = step_dist * travel_steps
 
             # Then move the car in the correct direction
