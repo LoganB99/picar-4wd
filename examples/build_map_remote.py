@@ -452,7 +452,7 @@ def main():
             # Check future points in path to see if they continue the same direction
             while (
                 current_path_index + 1 < len(path) and
-                travel_steps < 15
+                travel_steps < 10
             ):
                 # Direction from path[current_path_index] to path[current_path_index+1]
                 next_dir = (
@@ -504,7 +504,7 @@ def main():
         #print travel steps remaining
         # print("travel steps remaining: ", len(path) - current_path_index)
         # fc.stop()
-        if iterations % 10 == 0 or NEED_TO_RESCAN:
+        if iterations % 8 == 0 or NEED_TO_RESCAN:
             print("rescanning")
             path = None
             while path is None:
