@@ -270,9 +270,12 @@ def scan_data_to_map():
             
             # Get obstacle point coordinates once
             x, y = get_xy_coords(angle, distance)
-            x_min, x_max = max(0, int(x) - 15), min(MAP_WIDTH, int(x) + 15)
-            y_min, y_max = max(0, int(y) - 15), min(MAP_HEIGHT, int(y) + 15)
-            map_array[y_min:y_max, x_min:x_max] = 1
+            radius = 15
+            print("the range will be ", max(0, int(x) - radius), min(MAP_WIDTH, int(x) + radius), max(0, int(y) - radius), min(MAP_HEIGHT, int(y) + radius))
+            for i in range(max(0, int(x) - radius), min(MAP_WIDTH, int(x) + radius)):
+                for j in range(max(0, int(y) - radius), min(MAP_HEIGHT, int(y) + radius)):
+                    if (i - x)**2 + (j - y)**2 <= radius**2:
+                        map_array[j, i] = 1
 
 
     # Connect nearby points
@@ -457,6 +460,8 @@ def main():
         #     print("direction is ", direction)
         time.sleep(3)
         scan_data_to_map()
+        turn_and_move('E', 0)
+        break
             
 
         
