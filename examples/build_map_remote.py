@@ -284,23 +284,23 @@ def scan_data_to_map():
             
             # Get obstacle point coordinates once
             x, y = get_xy_coords(angle, distance)
-            for i in range(10):
-                for j in range(10):
-                    points.append((x+i, y+j))
+            for i in range(15):
+                for j in range(15):
+                    map_array[int(y+i), int(x+j)] = 1
 
 
     # Connect nearby points
-    MAX_POINT_DISTANCE = 10
-    for i in range(len(points)):
-       for j in range(i + 1, len(points)):
-           x1, y1 = points[i]
-           x2, y2 = points[j]
+    # MAX_POINT_DISTANCE = 10
+    # for i in range(len(points)):
+    #    for j in range(i + 1, len(points)):
+    #        x1, y1 = points[i]
+    #        x2, y2 = points[j]
             
-        #Calculate distance between points
-           dist = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+    #     #Calculate distance between points
+    #        dist = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
             
-           if dist <= MAX_POINT_DISTANCE:
-               connect_points(map_array, x1, y1, x2, y2)
+    #        if dist <= MAX_POINT_DISTANCE:
+    #            connect_points(map_array, x1, y1, x2, y2)
     
     # Send processed map data to server
     try:
