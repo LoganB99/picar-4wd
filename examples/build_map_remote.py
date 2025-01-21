@@ -23,7 +23,7 @@ ANGLES_TO_SCAN = list(range(SCAN_START_ANGLE, SCAN_END_ANGLE, SCAN_ANGLE_STEP))
 
 POWER = 10  # Set car POWER to 10
 TURN_POWER = 50  # Set turn POWER to 50
-SCAN_REF = 20
+SCAN_REF = 35
 GRAYSCALE_REF = 400
 FORWARD_SCAN_RANGE = slice(3,7)  # Indices for forward-facing sensors
 TURN_SLEEP = .36
