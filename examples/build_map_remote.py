@@ -419,7 +419,7 @@ def main():
             # Check future points in path to see if they continue the same direction
             while (
                 current_path_index + 1 < len(path) and
-                travel_steps < 30
+                travel_steps < 10
             ):
                 # Direction from path[current_path_index] to path[current_path_index+1]
                 next_dir = (
@@ -463,17 +463,23 @@ def main():
         #print travel steps remaining
         print("travel steps remaining: ", len(path) - current_path_index)
         # fc.stop()
-        # if iterations % 10 == 0 or NEED_TO_RESCAN:
-        #     path = None
-        #     while path is None:
-        #         scan_data_to_map()
-        #         NEED_TO_RESCAN = False
-        #         path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
-        #         current_path_index = 0
-        #         print(path)
-        #         print(direction)
+        if iterations % 10 == 0 or NEED_TO_RESCAN:
+            print("rescanning")
 
-        # scan_data_to_map()
+            path = None
+            while path is None:
+                scan_data_to_map()
+                NEED_TO_RESCAN = False
+                path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
+                current_path_index = 0
+            print("car_x is ", car_x)
+            print("car_y is ", car_y)
+            print("goal_x is ", goal_x)
+            print("goal_y is ", goal_y)
+            print("direction is ", direction)
+            break
+
+        
 
 if __name__ == "__main__":
     try:
