@@ -294,7 +294,7 @@ def scan_data_to_map():
            x1, y1 = points[i]
            x2, y2 = points[j]
             
-            Calculate distance between points
+        #Calculate distance between points
            dist = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
             
            if dist <= MAX_POINT_DISTANCE:
