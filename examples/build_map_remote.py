@@ -281,18 +281,17 @@ def scan_data_to_map():
         
     # Scan left to right and collect points
     print("Scanning left to right...")
-    clearance = 15
     for angle in ANGLES_TO_SCAN:
         distance = fc.get_distance_at(angle)
         if distance > 0:  # Only record valid measurements
             # Clear points along the ray until the obstacle
-            for d in range(int(distance)):
+            for d in range(int(distance-SCAN_REF)):
                 x, y = get_xy_coords(angle, d)
                 if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
                     map_array[int(y), int(x)] = 0
             
             # Get obstacle point coordinates once
-            x, y = get_xy_coords(angle, distance)
+            x, y = get_xy_coords(angle, distance-SCAN_REF)
             # Create a grid of clearance points around the obstacle
             x_indices = np.clip(np.arange(int(x) - clearance, int(x) + clearance + 1), 0, MAP_WIDTH - 1)
             y_indices = np.clip(np.arange(int(y) - clearance, int(y) + clearance + 1), 0, MAP_HEIGHT - 1)
