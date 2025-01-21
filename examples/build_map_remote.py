@@ -316,6 +316,19 @@ def scan_data_to_map():
         print(f"Failed to connect to server: {e}")
         time.sleep(1)
 
+def send_path_to_server(path):
+    if path:
+        try:
+            response = requests.post(
+                f"{SERVER_URL}/update_path",
+                json={'path': [[int(x), int(y)] for x, y in path]},
+                timeout=5
+            )
+            if response.status_code != 200:
+                print(f"Error sending path: {response.status_code}")
+        except requests.exceptions.RequestException as e:
+            print(f"Failed to send path to server: {e}")
+
 def main():
     global detect, car_x, car_y, NEED_TO_RESCAN, map_array
     detection_queue = queue.Queue()
@@ -347,6 +360,7 @@ def main():
     while path is None:
         scan_data_to_map()
         path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
+        send_path_to_server(path)
 
     current_path_index = 0
     # print(path)
@@ -461,13 +475,13 @@ def main():
         # fc.stop()
         if iterations % 3 == 0 or NEED_TO_RESCAN:
             print("rescanning")
-
             path = None
             while path is None:
                 turn_and_move('N', 0)
                 scan_data_to_map()
                 NEED_TO_RESCAN = False
                 path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
+                send_path_to_server(path)
                 current_path_index = 0
             print("car_x is ", car_x)
             print("car_y is ", car_y)

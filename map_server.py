@@ -39,13 +39,17 @@ car_y = CAR_START_Y
 goal_x = CAR_START_X
 goal_y = CAR_START_Y
 
+# Add these at the top with other global variables
+path_array = []  # Store the current path
+path_lock = threading.Lock()  # Add lock for path updates
+
 def init_visualization():
     pass
 
 
 def update_visualization():
     # Acquire lock before updating visualization
-    with map_lock:
+    with map_lock, path_lock:  # Use both locks
         x_min = int(max(0, car_x - 100))
         x_max = int(min(MAP_WIDTH, car_x + 100))
         y_min = int(max(0, car_y - 100))
@@ -57,6 +61,12 @@ def update_visualization():
         plt.title('Environment Map')
         plt.xlabel('X Position (cm)')
         plt.ylabel('Y Position (cm)')
+        
+        # Draw the path if it exists
+        if path_array:
+            path_x = [point[0] for point in path_array]
+            path_y = [point[1] for point in path_array]
+            plt.plot(path_x, path_y, 'b-', linewidth=2, label='Path')
         
         plt.grid(True, linestyle='--', alpha=0.7)
         plt.plot(car_x, car_y, 'r^', markersize=CAR_MARKER_SIZE, label='Car')
@@ -106,12 +116,13 @@ def get_map():
 
 @app.route('/reset_map', methods=['POST'])
 def reset_map():
-    global map_array, car_x, car_y
-    # Acquire lock before resetting map
-    with map_lock:
+    global map_array, car_x, car_y, path_array
+    # Acquire locks before resetting
+    with map_lock, path_lock:
         map_array = np.zeros((MAP_HEIGHT, MAP_WIDTH))
         car_x = CAR_START_X
         car_y = CAR_START_Y
+        path_array = []
     return {'status': 'success'}
 
 @app.route('/')
@@ -158,6 +169,15 @@ def home():
     </html>
     '''
     return render_template_string(html)
+
+# Add a new route to update the path
+@app.route('/update_path', methods=['POST'])
+def update_path():
+    global path_array
+    data = request.json
+    with path_lock:
+        path_array = data['path']
+    return {'status': 'success'}
 
 def run_flask():
     app.run(host='0.0.0.0', port=5000)
