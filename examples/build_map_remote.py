@@ -43,31 +43,15 @@ detect = None
 map_array = np.zeros((MAP_HEIGHT, MAP_WIDTH))
 
 def turn_and_move(cardinal_direction, distance):
-    global direction
-    directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
+    global direction, NEED_TO_RESCAN
+    directions = ['N', 'E', 'S', 'W']
     print("direction is ", direction)
     print("cardinal_direction is ", cardinal_direction)
     print("distance is ", distance)
     current_index = directions.index(direction)
     target_index = directions.index(cardinal_direction)
-    angle_diff = (target_index - current_index) % 8
-
-    if angle_diff == 1 or angle_diff == -7:
-        angle = 45
-    elif angle_diff == 2 or angle_diff == -6:
-        angle = 90
-    elif angle_diff == 3 or angle_diff == -5:
-        angle = 135
-    elif angle_diff == 4 or angle_diff == -4:
-        angle = 180
-    elif angle_diff == 5 or angle_diff == -3:
-        angle = -135
-    elif angle_diff == 6 or angle_diff == -2:
-        angle = -90
-    elif angle_diff == 7 or angle_diff == -1:
-        angle = -45
-    else:
-        angle = 0
+    angle_diff = (target_index - current_index) % 4
+    angle = angle_diff * 90
 
     print(f"Turning {angle} degrees and moving")
     if angle > 0:
@@ -77,6 +61,7 @@ def turn_and_move(cardinal_direction, distance):
     if angle != 0:
         print("turning for ", abs(angle) / 90 * TURN_SLEEP, " seconds")
         time.sleep(abs(angle) / 90 * TURN_SLEEP)
+        NEED_TO_RESCAN = True
     fc.stop()
     
     # Update direction
@@ -443,11 +428,7 @@ def main():
             distance = step_dist * travel_steps
 
             # Then move the car in the correct direction
-            if dir_change == (1, 1):
-                turn_and_move('NE', int(distance))
-            elif dir_change == (-1, -1):
-                turn_and_move('SW', int(distance))
-            elif dir_change == (0, 1):
+            if dir_change == (0, 1):
                 turn_and_move('N', int(distance))
             elif dir_change == (0, -1):
                 turn_and_move('S', int(distance))
@@ -455,10 +436,6 @@ def main():
                 turn_and_move('E', int(distance))
             elif dir_change == (-1, 0):
                 turn_and_move('W', int(distance))
-            elif dir_change == (1, -1):
-                turn_and_move('SE', int(distance))
-            elif dir_change == (-1, 1):
-                turn_and_move('NW', int(distance))
         print("direction is ", direction)
         #print travel steps remaining
         print("travel steps remaining: ", len(path) - current_path_index)
