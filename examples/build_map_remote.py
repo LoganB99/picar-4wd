@@ -335,7 +335,6 @@ def main():
     while path is None:
         scan_data_to_map()
         path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
-        exit()
     current_path_index = 0
     # print(path)
     # Send goal to server
