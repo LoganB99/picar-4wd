@@ -499,6 +499,7 @@ def main():
         #print travel steps remaining
         # print("travel steps remaining: ", len(path) - current_path_index)
         # fc.stop()
+        #Happy with one obstacle
         if iterations % 8 == 0 or NEED_TO_RESCAN:
             print("rescanning")
             path = None
