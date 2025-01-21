@@ -285,6 +285,7 @@ def scan_data_to_map():
                 for j in range(max(0, int(y) - radius), min(MAP_HEIGHT, int(y) + radius)):
                     if (i - x)**2 + (j - y)**2 <= radius**2:
                         map_array[j, i] = 1
+        time.sleep(0.1)
 
 
     # Connect nearby points
