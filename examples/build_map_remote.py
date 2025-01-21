@@ -472,7 +472,7 @@ def main():
             # print(f"Moving {travel_steps} step(s) in direction {dir_change}, ending at {next_point}")
 
             # Compute distance for all traveled steps in that direction
-            step_dist = math.sqrt(dir_change[0]**2 + dir_change[1]**2)
+            step_dist = int(math.sqrt(dir_change[0]**2 + dir_change[1]**2))
             distance = step_dist * travel_steps
 
             # Then move the car in the correct direction
