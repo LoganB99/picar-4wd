@@ -284,9 +284,9 @@ def scan_data_to_map():
             
             # Get obstacle point coordinates once
             x, y = get_xy_coords(angle, distance)
-            for i in range(5):
-                for j in range(-10,10):
-                    map_array[int(y+i), int(x-j)] = 1
+            x_min, x_max = max(0, int(x) - 15), min(MAP_WIDTH, int(x) + 15)
+            y_min, y_max = max(0, int(y) - 15), min(MAP_HEIGHT, int(y) + 15)
+            map_array[y_min:y_max, x_min:x_max] = 1
 
 
     # Connect nearby points
