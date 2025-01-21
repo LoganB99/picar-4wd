@@ -209,7 +209,7 @@ def a_star_search(map_array, start, goal):
     # Maintain an open set of nodes to explore. Lowest f-score is explored first
     open_set = queue.PriorityQueue()
     open_set.put((0, start))
-    came_from = {}
+    came_from = {start: (None, 'N')}  # Track direction, starting as 'N' (North)
 
     g_score = {start: 0}
     f_score = {start: heuristic(start, goal)}
@@ -228,7 +228,7 @@ def a_star_search(map_array, start, goal):
             path = []
             while current in came_from:
                 path.append(current)
-                current = came_from[current]
+                current, _ = came_from[current]
             path.append(start)
             path.reverse()
             print("path is ", path)
@@ -240,6 +240,11 @@ def a_star_search(map_array, start, goal):
             [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (1, 1), (-1, 1), (1, -1)]
         ]
 
+        direction_map = {
+            (-1, 0): 'W', (1, 0): 'E', (0, -1): 'S', (0, 1): 'N',
+            (-1, -1): 'SW', (1, 1): 'NE', (-1, 1): 'NW', (1, -1): 'SE'
+        }
+
         for neighbor in neighbors:
             if 0 <= neighbor[0] < map_array.shape[1] and 0 <= neighbor[1] < map_array.shape[0]:
                 if map_array[int(neighbor[1]), int(neighbor[0])] == 1:  # Obstacle
@@ -250,8 +255,16 @@ def a_star_search(map_array, start, goal):
                 proximity_cost = map_array[int(neighbor[1]), int(neighbor[0])]
                 tentative_g_score = g_score[current] + move_cost + proximity_cost
 
+                # Get the direction from current to neighbor
+                direction = direction_map[(neighbor[0] - current[0], neighbor[1] - current[1])]
+                _, prev_direction = came_from[current]
+
+                # Add penalty for changing direction
+                if direction != prev_direction:
+                    tentative_g_score += 0.5  # Penalty for changing direction
+
                 if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
-                    came_from[neighbor] = current
+                    came_from[neighbor] = (current, direction)
                     g_score[neighbor] = tentative_g_score
                     f_score[neighbor] = tentative_g_score + heuristic(neighbor, goal)
                     open_set.put((f_score[neighbor], neighbor))
@@ -426,7 +439,7 @@ def main():
                 int(next_point[1] - car_y)
             )
             # print("next_point is", next_point)
-            # print("dir_change is", dir_change)
+            print("dir_change is", dir_change)
             if abs(dir_change[0]) > 1 or abs(dir_change[1]) > 1:
                 print("dir_change is too big")
                 break
