@@ -26,7 +26,7 @@ TURN_POWER = 50  # Set turn POWER to 50
 SCAN_REF = 35
 GRAYSCALE_REF = 400
 FORWARD_SCAN_RANGE = slice(3,7)  # Indices for forward-facing sensors
-TURN_SLEEP = .66
+TURN_SLEEP = .72
 
 NEED_TO_RESCAN = False
 
@@ -284,8 +284,8 @@ def scan_data_to_map():
             
             # Get obstacle point coordinates once
             x, y = get_xy_coords(angle, distance)
-            for i in range(3):
-                for j in range(3):
+            for i in range(10):
+                for j in range(10):
                     points.append((x+i, y+j))
 
 
