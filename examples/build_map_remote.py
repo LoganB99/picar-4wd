@@ -23,7 +23,7 @@ ANGLES_TO_SCAN = list(range(SCAN_START_ANGLE, SCAN_END_ANGLE, SCAN_ANGLE_STEP))
 
 POWER = 10  # Set car POWER to 10
 TURN_POWER = 50  # Set turn POWER to 50
-SCAN_REF = 35
+SCAN_REF = 20
 GRAYSCALE_REF = 400
 FORWARD_SCAN_RANGE = slice(3,7)  # Indices for forward-facing sensors
 TURN_SLEEP = .72
@@ -278,7 +278,7 @@ def scan_data_to_map():
             
             # Get obstacle point coordinates once
             x, y = get_xy_coords(angle, distance)
-            radius = 10
+            radius = 20
             # print("the range will be ", max(0, int(x) - radius), min(MAP_WIDTH, int(x) + radius), max(0, int(y) - radius), min(MAP_HEIGHT, int(y) + radius))
             for i in range(max(0, int(x) - radius), min(MAP_WIDTH, int(x) + radius)):
                 for j in range(max(0, int(y) - radius), min(MAP_HEIGHT, int(y) + radius)):
