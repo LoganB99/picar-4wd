@@ -44,16 +44,16 @@ map_array = np.zeros((MAP_HEIGHT, MAP_WIDTH))
 
 def turn_and_move(cardinal_direction, distance):
     global direction, NEED_TO_RESCAN
-    directions = ['N', 'E', 'S', 'W']
+    directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
     current_index = directions.index(direction)
     target_index = directions.index(cardinal_direction)
-    angle_diff = (target_index - current_index) % 4
+    angle_diff = (target_index - current_index) % 8
 
     # Determine the optimal turning angle
-    if angle_diff == 3:
-        angle = -90  # Turn left 90 degrees
+    if angle_diff > 4:
+        angle = (angle_diff - 8) * 45  # Turn left
     else:
-        angle = angle_diff * 90  # Turn right or 180 degrees
+        angle = angle_diff * 45  # Turn right
 
     # Execute the turn
     if angle > 0:
@@ -61,8 +61,8 @@ def turn_and_move(cardinal_direction, distance):
     elif angle < 0:
         fc.turn_left(TURN_POWER)
     if angle != 0:
-        print("turning for ", abs(angle) / 90 * TURN_SLEEP, " seconds")
-        time.sleep(abs(angle) / 90 * TURN_SLEEP)
+        print("turning for ", abs(angle) / 45 * TURN_SLEEP, " seconds")
+        time.sleep(abs(angle) / 45 * TURN_SLEEP)
     fc.stop()
     
     # Update direction
@@ -203,8 +203,8 @@ def a_star_search(map_array, start, goal):
     # print("goal is ", goal)
 
     def heuristic(a, b):
-        # manhattan distance
-        return abs(a[0] - b[0]) + abs(a[1] - b[1])
+        # Euclidean distance
+        return math.sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)
 
     # Maintain an open set of nodes to explore. Lowest f-score is explored first
     open_set = queue.PriorityQueue()
@@ -234,9 +234,10 @@ def a_star_search(map_array, start, goal):
             print("path is ", path)
             return path
         
-        # Get neighbors
+        # Get neighbors including diagonals
         neighbors = [
-            (int(current[0] + dx), int(current[1] + dy)) for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]
+            (int(current[0] + dx), int(current[1] + dy)) for dx, dy in 
+            [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (1, 1), (-1, 1), (1, -1)]
         ]
 
         for neighbor in neighbors:
@@ -244,9 +245,10 @@ def a_star_search(map_array, start, goal):
                 if map_array[int(neighbor[1]), int(neighbor[0])] == 1:  # Obstacle
                     continue
                 
-                # Adjust the cost based on proximity to obstacles
+                # Calculate cost for diagonal movement
+                move_cost = math.sqrt(2) if abs(neighbor[0] - current[0]) == 1 and abs(neighbor[1] - current[1]) == 1 else 1
                 proximity_cost = map_array[int(neighbor[1]), int(neighbor[0])]
-                tentative_g_score = g_score[current] + 1 + proximity_cost
+                tentative_g_score = g_score[current] + move_cost + proximity_cost
 
                 if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
                     came_from[neighbor] = current
@@ -425,7 +427,7 @@ def main():
             )
             # print("next_point is", next_point)
             # print("dir_change is", dir_change)
-            if dir_change[0] > 1 or dir_change[1] > 1:
+            if abs(dir_change[0]) > 1 or abs(dir_change[1]) > 1:
                 print("dir_change is too big")
                 break
 
@@ -469,6 +471,18 @@ def main():
             elif dir_change == (-1, 0):
                 print("want to move west")
                 turn_and_move('W', int(distance))
+            elif dir_change == (1, 1):
+                print("want to move northeast")
+                turn_and_move('NE', int(distance))
+            elif dir_change == (-1, 1):
+                print("want to move northwest")
+                turn_and_move('NW', int(distance))
+            elif dir_change == (1, -1):
+                print("want to move southeast")
+                turn_and_move('SE', int(distance))
+            elif dir_change == (-1, -1):
+                print("want to move southwest")
+                turn_and_move('SW', int(distance))
         # print("direction is ", direction)
         #print travel steps remaining
         # print("travel steps remaining: ", len(path) - current_path_index)
