@@ -192,9 +192,7 @@ def a_star_search(map_array, start, goal):
     goal = (int(goal[0]), int(goal[1]))
     print("start is ", start)
     print("goal is ", goal)
-    import time
 
-    threshold = 10
     def heuristic(a, b):
         # manhattan distance
         return abs(a[0] - b[0]) + abs(a[1] - b[1])
@@ -270,7 +268,7 @@ def scan_data_to_map():
             
             # Get obstacle point coordinates once
             x, y = get_xy_coords(angle, distance)
-            radius = 12
+            radius = 5
             print("the range will be ", max(0, int(x) - radius), min(MAP_WIDTH, int(x) + radius), max(0, int(y) - radius), min(MAP_HEIGHT, int(y) + radius))
             for i in range(max(0, int(x) - radius), min(MAP_WIDTH, int(x) + radius)):
                 for j in range(max(0, int(y) - radius), min(MAP_HEIGHT, int(y) + radius)):
