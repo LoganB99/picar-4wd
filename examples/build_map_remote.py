@@ -408,7 +408,7 @@ def main():
         # print("goal_y is ", goal_y)
         iterations = iterations + 1
         # Check if car is within 5 cm of the goal
-        if abs(car_x - goal_x) <= 5 and abs(car_y - goal_y) <= 5:
+        if abs(car_x - goal_x) <= 10 and abs(car_y - goal_y) <= 10:
             print("Goal reached!")
             break
 
