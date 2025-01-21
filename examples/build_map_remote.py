@@ -244,13 +244,14 @@ def a_star_search(map_array, start, goal):
                 if map_array[int(neighbor[1]), int(neighbor[0])] == 1:  # Obstacle
                     continue
                 
-                
-                tentative_g_score = int(g_score[current] + 1)
+                # Adjust the cost based on proximity to obstacles
+                proximity_cost = map_array[int(neighbor[1]), int(neighbor[0])]
+                tentative_g_score = g_score[current] + 1 + proximity_cost
 
                 if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
                     came_from[neighbor] = current
                     g_score[neighbor] = tentative_g_score
-                    f_score[neighbor] = int(tentative_g_score + heuristic(neighbor, goal))
+                    f_score[neighbor] = tentative_g_score + heuristic(neighbor, goal)
                     open_set.put((f_score[neighbor], neighbor))
     
     print("No path found")
@@ -274,7 +275,7 @@ def scan_data_to_map():
             for d in range(int(distance)):
                 x, y = get_xy_coords(angle, d)
                 if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
-                    map_array[int(y), int(x)] = 0
+                    map_array[int(y), int(x)] = d / distance  # Set value based on distance
             
             # Get obstacle point coordinates once
             x, y = get_xy_coords(angle, distance)
