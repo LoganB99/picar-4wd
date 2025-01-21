@@ -459,8 +459,9 @@ def main():
         #     print("goal_y is ", goal_y)
         #     print("direction is ", direction)
         time.sleep(3)
-        scan_data_to_map()
         turn_and_move('E', 0)
+        scan_data_to_map()
+        time.sleep(3)
         break
             
 
