@@ -45,15 +45,17 @@ map_array = np.zeros((MAP_HEIGHT, MAP_WIDTH))
 def turn_and_move(cardinal_direction, distance):
     global direction, NEED_TO_RESCAN
     directions = ['N', 'E', 'S', 'W']
-    # print("direction is ", direction)
-    # print("cardinal_direction is ", cardinal_direction)
-    # print("distance is ", distance)
     current_index = directions.index(direction)
     target_index = directions.index(cardinal_direction)
     angle_diff = (target_index - current_index) % 4
-    angle = angle_diff * 90
 
-    # print(f"Turning {angle} degrees and moving")
+    # Determine the optimal turning angle
+    if angle_diff == 3:
+        angle = -90  # Turn left 90 degrees
+    else:
+        angle = angle_diff * 90  # Turn right or 180 degrees
+
+    # Execute the turn
     if angle > 0:
         fc.turn_right(TURN_POWER)
     elif angle < 0:
@@ -61,20 +63,28 @@ def turn_and_move(cardinal_direction, distance):
     if angle != 0:
         print("turning for ", abs(angle) / 90 * TURN_SLEEP, " seconds")
         time.sleep(abs(angle) / 90 * TURN_SLEEP)
-        NEED_TO_RESCAN = True
     fc.stop()
     
     # Update direction
     direction = cardinal_direction
-    
+    if distance == 0:
+        return
     # Calculate duration based on speed
     speed = 33  # Speed in cm/s
     duration = distance / speed
-    
-    fc.forward(POWER)
-    time.sleep(duration)
-    fc.stop()
-    update_car_position(distance)
+    scan_list = False
+    while not scan_list:
+        scan_list = fc.scan_step(SCAN_REF)
+    scan_list = get_complete_scan()
+    is_clear = check_path_clear(scan_list)
+    if is_clear:
+        fc.forward(POWER)
+        time.sleep(duration)
+        fc.stop()
+        update_car_position(distance)
+    else:
+        NEED_TO_RESCAN = True
+        
     # Update car position while moving
     
     
@@ -268,7 +278,7 @@ def scan_data_to_map():
             
             # Get obstacle point coordinates once
             x, y = get_xy_coords(angle, distance)
-            radius = 5
+            radius = 10
             # print("the range will be ", max(0, int(x) - radius), min(MAP_WIDTH, int(x) + radius), max(0, int(y) - radius), min(MAP_HEIGHT, int(y) + radius))
             for i in range(max(0, int(x) - radius), min(MAP_WIDTH, int(x) + radius)):
                 for j in range(max(0, int(y) - radius), min(MAP_HEIGHT, int(y) + radius)):
@@ -447,20 +457,21 @@ def main():
         #print travel steps remaining
         # print("travel steps remaining: ", len(path) - current_path_index)
         # fc.stop()
-        # if iterations % 10 == 0 or NEED_TO_RESCAN:
-        #     print("rescanning")
+        if iterations % 3 == 0 or NEED_TO_RESCAN:
+            print("rescanning")
 
-        #     path = None
-        #     while path is None:
-        #         scan_data_to_map()
-        #         NEED_TO_RESCAN = False
-        #         path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
-        #         current_path_index = 0
-        #     print("car_x is ", car_x)
-        #     print("car_y is ", car_y)
-        #     print("goal_x is ", goal_x)
-        #     print("goal_y is ", goal_y)
-        #     print("direction is ", direction)
+            path = None
+            while path is None:
+                turn_and_move('N', 0)
+                scan_data_to_map()
+                NEED_TO_RESCAN = False
+                path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
+                current_path_index = 0
+            print("car_x is ", car_x)
+            print("car_y is ", car_y)
+            print("goal_x is ", goal_x)
+            print("goal_y is ", goal_y)
+            print("direction is ", direction)
             
 
         
