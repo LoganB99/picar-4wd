@@ -281,7 +281,7 @@ def scan_data_to_map():
         
     # Scan left to right and collect points
     print("Scanning left to right...")
-    clearance = 8
+    clearance = 15
     for angle in ANGLES_TO_SCAN:
         distance = fc.get_distance_at(angle)
         if distance > 0:  # Only record valid measurements
