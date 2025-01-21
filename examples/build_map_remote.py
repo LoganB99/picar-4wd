@@ -284,8 +284,8 @@ def scan_data_to_map():
             
             # Get obstacle point coordinates once
             x, y = get_xy_coords(angle, distance)
-            x_min, x_max = max(0, int(x) - 15), min(MAP_WIDTH, int(x) + 15)
-            y_min, y_max = max(0, int(y) - 15), min(MAP_HEIGHT, int(y) + 15)
+            x_min, x_max = max(0, int(x) - SCAN_REF), min(MAP_WIDTH, int(x) + SCAN_REF)
+            y_min, y_max = max(0, int(y) - SCAN_REF), min(MAP_HEIGHT, int(y) + SCAN_REF)
             map_array[y_min:y_max, x_min:x_max] = 1
 
 
