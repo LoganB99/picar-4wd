@@ -73,7 +73,7 @@ def turn_and_move(cardinal_direction, distance):
         return
 
     # Calculate duration based on speed
-    speed = 33  # Speed in cm/s
+    speed = 25  # Speed in cm/s
     max_duration = distance / speed
     scan_list = False
     while not scan_list:
@@ -465,7 +465,7 @@ def main():
             # Check future points in path to see if they continue the same direction
             while (
                 current_path_index + 1 < len(path) and
-                travel_steps < 10
+                travel_steps < 15
             ):
                 # Direction from path[current_path_index] to path[current_path_index+1]
                 next_dir = (
