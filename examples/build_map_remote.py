@@ -393,6 +393,7 @@ def main():
     detection_queue = queue.Queue()
     detect = fc.Detect(detection_queue=detection_queue, enable_edgetpu=False, num_threads = 2, enable_preview=False)
     detect.start()
+    time.sleep(1)
     # print("Starting autonomous navigation...")
     
     
