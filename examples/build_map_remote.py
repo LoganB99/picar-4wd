@@ -93,10 +93,10 @@ def turn_and_move(cardinal_direction, distance):
             pause_stop_sign = 10
             break
         if detect.seePerson:
+            duration = time.time() - start_time
+            fc.stop()
             while detect.seePerson:
-                duration = time.time() - start_time
-                fc.stop()
-                time.sleep(.1)
+                time.sleep(.5)
             break
     fc.stop()
     true_distance = duration * speed
@@ -416,10 +416,20 @@ def main():
     # print(goal_y)
     # print(direction)
     path = None
-    while path is None:
+    tries = 0
+    while path is None and tries < 3:
         scan_data_to_map()
         path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
-        send_path_to_server(path)
+        if path is None:
+            goal_x = goal_x + 5
+            goal_y = goal_y + 5
+            tries = tries + 1
+        else:
+            send_path_to_server(path)
+            break
+    if path is None:
+        print("No path found")
+        sys.exit(1)
 
     current_path_index = 0
     # print(path)
@@ -527,13 +537,23 @@ def main():
         if iterations % 8 == 0 or NEED_TO_RESCAN:
             print("rescanning")
             path = None
-            while path is None:
+            tries = 0
+            while path is None and tries < 3:
                 turn_and_move('N', 0)
                 scan_data_to_map()
                 NEED_TO_RESCAN = False
                 path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
-                send_path_to_server(path)
-                current_path_index = 0
+                if path is None:
+                    goal_x = goal_x + 5
+                    goal_y = goal_y + 5
+                    tries = tries + 1
+                else:
+                    send_path_to_server(path)
+                    current_path_index = 0
+                    tries = tries + 1
+            if path is None:
+                print("No path found")
+                sys.exit(1)
             print("car_x is ", car_x)
             print("car_y is ", car_y)
             print("goal_x is ", goal_x)
