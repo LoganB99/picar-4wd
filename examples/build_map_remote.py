@@ -465,7 +465,7 @@ def main():
             # Check future points in path to see if they continue the same direction
             while (
                 current_path_index + 1 < len(path) and
-                travel_steps < 10
+                travel_steps < 15
             ):
                 # Direction from path[current_path_index] to path[current_path_index+1]
                 next_dir = (
