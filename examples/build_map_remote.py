@@ -301,9 +301,14 @@ def scan_data_to_map():
         
     # Scan left to right and collect points
     # print("Scanning left to right...")
+    found_angles = []
+    max_distance = 0
+
     for angle in ANGLES_TO_SCAN:
         distance = fc.get_distance_at(angle)
         if distance > 0:  # Only record valid measurements
+            found_angles.append(angle)
+            max_distance = max(max_distance, distance)
             # Clear points along the ray until the obstacle
             for d in range(int(distance)):
                 x, y = get_xy_coords(angle, d)
@@ -312,12 +317,28 @@ def scan_data_to_map():
             
             # Get obstacle point coordinates once
             x, y = get_xy_coords(angle, distance)
-            radius = max(5, min(20, int(distance / 2)))
-            # print("the range will be ", max(0, int(x) - radius), min(MAP_WIDTH, int(x) + radius), max(0, int(y) - radius), min(MAP_HEIGHT, int(y) + radius))
+            radius = max(5, min(10, int(distance / 2)))
             for i in range(max(0, int(x) - radius), min(MAP_WIDTH, int(x) + radius)):
                 for j in range(max(0, int(y) - radius), min(MAP_HEIGHT, int(y) + radius)):
                     if (i - x)**2 + (j - y)**2 <= radius**2:
                         map_array[j, i] = 1
+
+    # Add rays to the left and right of found angles
+    for angle in found_angles:
+        left_angle = angle - SCAN_ANGLE_STEP
+        right_angle = angle + SCAN_ANGLE_STEP
+
+        if left_angle in ANGLES_TO_SCAN and left_angle not in found_angles:
+            for d in range(int(max_distance)):
+                x, y = get_xy_coords(left_angle, d)
+                if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
+                    map_array[int(y), int(x)] = d / max_distance
+
+        if right_angle in ANGLES_TO_SCAN and right_angle not in found_angles:
+            for d in range(int(max_distance)):
+                x, y = get_xy_coords(right_angle, d)
+                if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
+                    map_array[int(y), int(x)] = d / max_distance
 
 
     # Connect nearby points
