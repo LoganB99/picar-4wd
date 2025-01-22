@@ -25,6 +25,9 @@ class Detect:
         self.detector = self.initialize_model()
         self.thread = threading.Thread(target=self.run)
         self.thread_flag = True
+        self.seeStopSign = False  # Initialize the seeStopSign boolean
+        self.seePerson = False
+        self.person_missing_frames = 0  # Counter for frames without seeing a person
 
     def initialize_camera(self) -> Picamera2:
         picam2 = Picamera2()
@@ -36,7 +39,7 @@ class Detect:
 
     def initialize_model(self):
         base_options = core.BaseOptions(file_name=self.model, use_coral=self.enable_edgetpu, num_threads=self.num_threads)
-        detection_options = processor.DetectionOptions(max_results=10, score_threshold=0.3)
+        detection_options = processor.DetectionOptions(max_results=3, score_threshold=0.3)
         options = vision.ObjectDetectorOptions(base_options=base_options, detection_options=detection_options)
         return vision.ObjectDetector.create_from_options(options)
 
@@ -44,6 +47,19 @@ class Detect:
         rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         input_tensor = vision.TensorImage.create_from_array(rgb_image)
         detection_result = self.detector.detect(input_tensor)
+        
+        # Check if a stop sign is detected
+        self.seeStopSign = any(detection.categories[0].category_name == 'stop sign' for detection in detection_result.detections)
+        
+        # Check if a person is detected
+        if any(detection.categories[0].category_name == 'person' for detection in detection_result.detections):
+            self.seePerson = True
+            self.person_missing_frames = 0  # Reset the counter if a person is seen
+        else:
+            self.person_missing_frames += 1
+            if self.person_missing_frames >= 3:
+                self.seePerson = False  # Set to False only if missing for 10 frames
+
         return detection_result
 
     def run(self) -> None:
@@ -58,16 +74,6 @@ class Detect:
                 counter += 1
                 detection_result = self.process_frame(image)
                 self.detection_queue.put(detection_result)
-
-                # Check the entire queue for stop signs and persons
-                self.seeStopSign = False
-                self.seePerson = False
-                while not self.detection_queue.empty():
-                    result = self.detection_queue.get()
-                    if any(detection.categories[0].category_name == 'stop sign' for detection in result.detections):
-                        self.seeStopSign = True
-                    if any(detection.categories[0].category_name == 'person' for detection in result.detections):
-                        self.seePerson = True
 
                 if self.enable_preview:
                     image = detect_utils.visualize(image, detection_result)
@@ -102,10 +108,14 @@ if __name__ == "__main__":
 
     try:
         while True:
-            if detect.seeStopSign:
-                print("Stop sign detected!")
-            if detect.seePerson:
-                print("Person detected!")
+            if not detection_queue.empty():
+                detection_result = detection_queue.get()
+                
+                # Access the seeStopSign boolean
+                if detect.seeStopSign:
+                    print("Stop sign detected!")
+                if detect.seePerson:
+                    print("Person detected!")
 
             time.sleep(0.1)
     except KeyboardInterrupt:

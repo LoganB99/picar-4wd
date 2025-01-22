@@ -57,7 +57,7 @@ class Detect:
             self.person_missing_frames = 0  # Reset the counter if a person is seen
         else:
             self.person_missing_frames += 1
-            if self.person_missing_frames >= 10:
+            if self.person_missing_frames >= 3:
                 self.seePerson = False  # Set to False only if missing for 10 frames
 
         return detection_result

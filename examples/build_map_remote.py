@@ -470,6 +470,7 @@ def main():
             while detect.seePerson:
                 time.sleep(.1)
 
+
         travel_steps = 1  # ensure we move at least one step
         current_path_index += 1
 
