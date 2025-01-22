@@ -80,7 +80,7 @@ def turn_and_move(cardinal_direction, distance):
     #     scan_list = fc.scan_step(SCAN_REF)
     # scan_list = get_complete_scan()
     # is_clear = check_path_clear(scan_list)
-    # duration = max_duration
+    duration = max_duration
     # if is_clear:
     start_time = time.time()
     fc.forward(POWER)
