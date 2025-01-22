@@ -323,7 +323,7 @@ def scan_data_to_map():
             
             # Get obstacle point coordinates once
             x, y = get_xy_coords(angle, distance)
-            radius = max(5, min(20, int(distance / 2)))
+            radius = max(5, min(10, int(distance / 2)))
             for i in range(max(0, int(x) - radius), min(MAP_WIDTH, int(x) + radius)):
                 for j in range(max(0, int(y) - radius), min(MAP_HEIGHT, int(y) + radius)):
                     if (i - x)**2 + (j - y)**2 <= radius**2:
