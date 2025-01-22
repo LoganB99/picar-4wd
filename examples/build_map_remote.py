@@ -325,8 +325,8 @@ def scan_data_to_map():
 
     # Add rays to the left and right of found angles
     for angle in found_angles:
-        left_angle = angle - SCAN_ANGLE_STEP
-        right_angle = angle + SCAN_ANGLE_STEP
+        left_angle = angle - .5 * SCAN_ANGLE_STEP
+        right_angle = angle + .5 * SCAN_ANGLE_STEP
 
         if left_angle in ANGLES_TO_SCAN and left_angle not in found_angles:
             for d in range(int(max_distance)):
