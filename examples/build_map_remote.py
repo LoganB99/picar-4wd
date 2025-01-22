@@ -73,7 +73,7 @@ def turn_and_move(cardinal_direction, distance):
         return
 
     # Calculate duration based on speed
-    speed = 25  # Speed in cm/s
+    speed = 35  # Speed in cm/s
     max_duration = distance / speed
     scan_list = False
     # while not scan_list:
