@@ -76,38 +76,38 @@ def turn_and_move(cardinal_direction, distance):
     speed = 25  # Speed in cm/s
     max_duration = distance / speed
     scan_list = False
-    while not scan_list:
-        scan_list = fc.scan_step(SCAN_REF)
-    scan_list = get_complete_scan()
-    is_clear = check_path_clear(scan_list)
-    duration = max_duration
-    if is_clear:
-        start_time = time.time()
-        fc.forward(POWER)
-        while time.time() - start_time < max_duration:
-            if detect.seeStopSign and pause_stop_sign == 0:
+    # while not scan_list:
+    #     scan_list = fc.scan_step(SCAN_REF)
+    # scan_list = get_complete_scan()
+    # is_clear = check_path_clear(scan_list)
+    # duration = max_duration
+    # if is_clear:
+    start_time = time.time()
+    fc.forward(POWER)
+    while time.time() - start_time < max_duration:
+        if detect.seeStopSign and pause_stop_sign == 0:
+            duration = time.time() - start_time
+            fc.stop()
+            print("stop sign detected")
+            time.sleep(2)
+            pause_stop_sign = 10
+            break
+        if detect.seePerson:
+            while detect.seePerson:
                 duration = time.time() - start_time
                 fc.stop()
-                print("stop sign detected")
-                time.sleep(2)
-                pause_stop_sign = 10
-                break
-            if detect.seePerson:
-                while detect.seePerson:
-                    duration = time.time() - start_time
-                    fc.stop()
-                    time.sleep(.1)
-                break
-        fc.stop()
-        true_distance = duration * speed
-        update_car_position(true_distance)
-    else:
-        print("obstacle detected")
-        fc.backward(POWER)
-        time.sleep(duration)
-        fc.stop()
-        update_car_position(-distance)
-        NEED_TO_RESCAN = True
+                time.sleep(.1)
+            break
+    fc.stop()
+    true_distance = duration * speed
+    update_car_position(true_distance)
+    # else:
+    #     print("obstacle detected")
+    #     fc.backward(POWER)
+    #     time.sleep(duration)
+    #     fc.stop()
+    #     update_car_position(-distance)
+    #     NEED_TO_RESCAN = True
         
     # Update car position while moving
     
