@@ -26,6 +26,7 @@ class Detect:
         self.thread = threading.Thread(target=self.run)
         self.thread_flag = True
         self.seeStopSign = False  # Initialize the seeStopSign boolean
+        self.seePerson = False
 
     def initialize_camera(self) -> Picamera2:
         picam2 = Picamera2()
@@ -47,8 +48,8 @@ class Detect:
         detection_result = self.detector.detect(input_tensor)
         
         # Check if a stop sign is detected
-        #self.seeStopSign = any(detection.class_name == 'stop sign' for detection in detection_result.detections)
-        self.seeStopSign = any(detection.categories[0].category_name for detection in detection_result.detections) 
+        self.seeStopSign = any(detection.categories[0].category_name == 'stop sign' for detection in detection_result.detections)
+        self.seePerson = any(detection.categories[0].category_name == 'person' for detection in detection_result.detections)
         return detection_result
 
     def run(self) -> None:
