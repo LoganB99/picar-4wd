@@ -394,6 +394,8 @@ def main():
     detect = fc.Detect(detection_queue=detection_queue, enable_edgetpu=False, num_threads = 2, enable_preview=False)
     detect.start()
     time.sleep(1)
+    # mostly happy with obstacles, need slight improvement on people detection
+    # then ready to record
     # print("Starting autonomous navigation...")
     
     
