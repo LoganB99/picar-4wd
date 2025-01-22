@@ -100,11 +100,12 @@ if __name__ == "__main__":
         while True:
             if not detection_queue.empty():
                 detection_result = detection_queue.get()
-                print(detection_result)
                 
                 # Access the seeStopSign boolean
                 if detect.seeStopSign:
                     print("Stop sign detected!")
+                if detect.seePerson:
+                    print("Person detected!")
 
             time.sleep(0.1)
     except KeyboardInterrupt:

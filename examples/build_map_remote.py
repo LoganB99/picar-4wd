@@ -26,7 +26,7 @@ TURN_POWER = 50  # Set turn POWER to 50
 SCAN_REF = 25
 GRAYSCALE_REF = 400
 FORWARD_SCAN_RANGE = slice(3,7)  # Indices for forward-facing sensors
-TURN_SLEEP = .33
+TURN_SLEEP = .36
 
 NEED_TO_RESCAN = False
 
@@ -465,7 +465,7 @@ def main():
             # Check future points in path to see if they continue the same direction
             while (
                 current_path_index + 1 < len(path) and
-                travel_steps < 15
+                travel_steps < 5
             ):
                 # Direction from path[current_path_index] to path[current_path_index+1]
                 next_dir = (
