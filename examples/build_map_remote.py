@@ -92,6 +92,12 @@ def turn_and_move(cardinal_direction, distance):
                 time.sleep(2)
                 pause_stop_sign = 10
                 break
+            if detect.seePerson:
+                while detect.seePerson:
+                    duration = time.time() - start_time
+                    fc.stop()
+                    time.sleep(.1)
+                break
         fc.stop()
         true_distance = duration * speed
         update_car_position(true_distance)
