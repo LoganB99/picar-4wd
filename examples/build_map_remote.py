@@ -332,13 +332,13 @@ def scan_data_to_map():
             for d in range(int(max_distance)):
                 x, y = get_xy_coords(left_angle, d)
                 if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
-                    map_array[int(y), int(x)] = d / max_distance
+                    map_array[int(y), int(x)] = .5 *d / max_distance
 
         if right_angle in ANGLES_TO_SCAN and right_angle not in found_angles:
             for d in range(int(max_distance)):
                 x, y = get_xy_coords(right_angle, d)
                 if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
-                    map_array[int(y), int(x)] = d / max_distance
+                    map_array[int(y), int(x)] = .5 *d / max_distance
 
 
     # Connect nearby points
