@@ -87,7 +87,9 @@ def turn_and_move(cardinal_direction, distance):
         while time.time() - start_time < max_duration:
             if detect.seeStopSign and pause_stop_sign == 0:
                 duration = time.time() - start_time
+                fc.stop()
                 print("stop sign detected")
+                time.sleep(2)
                 pause_stop_sign = 10
                 break
         fc.stop()
