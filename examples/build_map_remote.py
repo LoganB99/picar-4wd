@@ -360,7 +360,7 @@ def send_path_to_server(path):
             print(f"Failed to send path to server: {e}")
 
 def main():
-    global detect, car_x, car_y, NEED_TO_RESCAN, map_array
+    global detect, car_x, car_y, NEED_TO_RESCAN, map_array, pause_stop_sign
     detection_queue = queue.Queue()
     detect = fc.Detect(detection_queue=detection_queue, enable_edgetpu=False, num_threads = 1, enable_preview=False)
     detect.start()
@@ -418,6 +418,8 @@ def main():
         # print("goal_x is ", goal_x)
         # print("goal_y is ", goal_y)
         iterations = iterations + 1
+        if pause_stop_sign > 0:
+            pause_stop_sign = pause_stop_sign - 1
         # Check if car is within 5 cm of the goal
         if abs(car_x - goal_x) <= 10 and abs(car_y - goal_y) <= 10:
             print("Goal reached!")
