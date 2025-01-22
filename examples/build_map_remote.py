@@ -452,6 +452,7 @@ def main():
     steps_before_rescan = 10
     iterations = 0
     while True:
+
         # print("Starting iteration ", iterations)
         # print("car_x is ", car_x)
         # print("car_y is ", car_y)
@@ -469,6 +470,33 @@ def main():
             print("Person detected!")
             while detect.seePerson:
                 time.sleep(.1)
+            NEED_TO_RESCAN = True
+
+        if iterations % 8 == 0 or NEED_TO_RESCAN:
+            print("rescanning")
+            path = None
+            tries = 0
+            while path is None and tries < 3:
+                turn_and_move('N', 0)
+                scan_data_to_map()
+                NEED_TO_RESCAN = False
+                path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
+                if path is None:
+                    goal_x = goal_x + 5
+                    goal_y = goal_y + 5
+                    tries = tries + 1
+                else:
+                    send_path_to_server(path)
+                    current_path_index = 0
+                    tries = tries + 1
+            if path is None:
+                print("No path found")
+                sys.exit(1)
+            print("car_x is ", car_x)
+            print("car_y is ", car_y)
+            print("goal_x is ", goal_x)
+            print("goal_y is ", goal_y)
+            print("direction is ", direction)
 
 
         travel_steps = 1  # ensure we move at least one step
@@ -539,31 +567,7 @@ def main():
         # print("travel steps remaining: ", len(path) - current_path_index)
         # fc.stop()
         #Happy with one obstacle
-        if iterations % 8 == 0 or NEED_TO_RESCAN:
-            print("rescanning")
-            path = None
-            tries = 0
-            while path is None and tries < 3:
-                turn_and_move('N', 0)
-                scan_data_to_map()
-                NEED_TO_RESCAN = False
-                path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
-                if path is None:
-                    goal_x = goal_x + 5
-                    goal_y = goal_y + 5
-                    tries = tries + 1
-                else:
-                    send_path_to_server(path)
-                    current_path_index = 0
-                    tries = tries + 1
-            if path is None:
-                print("No path found")
-                sys.exit(1)
-            print("car_x is ", car_x)
-            print("car_y is ", car_y)
-            print("goal_x is ", goal_x)
-            print("goal_y is ", goal_y)
-            print("direction is ", direction)
+        
             
 
         
