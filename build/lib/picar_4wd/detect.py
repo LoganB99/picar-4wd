@@ -25,6 +25,7 @@ class Detect:
         self.detector = self.initialize_model()
         self.thread = threading.Thread(target=self.run)
         self.thread_flag = True
+        self.seeStopSign = False  # Initialize the seeStopSign boolean
 
     def initialize_camera(self) -> Picamera2:
         picam2 = Picamera2()
@@ -44,6 +45,10 @@ class Detect:
         rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         input_tensor = vision.TensorImage.create_from_array(rgb_image)
         detection_result = self.detector.detect(input_tensor)
+        
+        # Check if a stop sign is detected
+        #self.seeStopSign = any(detection.class_name == 'stop sign' for detection in detection_result.detections)
+        self.seeStopSign = any(detection.categories[0].category_name for detection in detection_result.detections) 
         return detection_result
 
     def run(self) -> None:
@@ -69,9 +74,8 @@ class Detect:
                     end_time = time.time()
                     fps = fps_avg_frame_count / (end_time - start_time)
                     start_time = time.time()
-                    logging.info(f"FPS: {fps:.2f}")
 
-                time.sleep(0.2)
+                time.sleep(1.0)
 
         except Exception as e:
             logging.error(f"An error occurred: {e}")
@@ -96,6 +100,10 @@ if __name__ == "__main__":
             if not detection_queue.empty():
                 detection_result = detection_queue.get()
                 print(detection_result)
+                
+                # Access the seeStopSign boolean
+                if detect.seeStopSign:
+                    print("Stop sign detected!")
 
             time.sleep(0.1)
     except KeyboardInterrupt:

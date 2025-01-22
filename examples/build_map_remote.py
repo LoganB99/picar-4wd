@@ -377,6 +377,7 @@ def main():
     # print(direction)
     path = None
     while path is None:
+        break
         scan_data_to_map()
         path = a_star_search(map_array, (car_x, car_y), (goal_x, goal_y))
         send_path_to_server(path)
@@ -418,7 +419,7 @@ def main():
             print("Stop sign detected!")
         else:
             print("No stop sign detected")
-
+        time.sleep(3)
 
         # travel_steps = 1  # ensure we move at least one step
         # current_path_index += 1
