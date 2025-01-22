@@ -329,22 +329,22 @@ def scan_data_to_map():
                     if (i - x)**2 + (j - y)**2 <= radius**2:
                         map_array[j, i] = 1
 
-    # Add rays to the left and right of found angles
-    for angle in found_angles:
-        left_angle = angle - .5 * SCAN_ANGLE_STEP
-        right_angle = angle + .5 * SCAN_ANGLE_STEP
+    # # Add rays to the left and right of found angles
+    # for angle in found_angles:
+    #     left_angle = angle - .5 * SCAN_ANGLE_STEP
+    #     right_angle = angle + .5 * SCAN_ANGLE_STEP
 
-        if left_angle in ANGLES_TO_SCAN and left_angle not in found_angles:
-            for d in range(int(max_distance)):
-                x, y = get_xy_coords(left_angle, d)
-                if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
-                    map_array[int(y), int(x)] = .5 *d / max_distance
+    #     if left_angle in ANGLES_TO_SCAN and left_angle not in found_angles:
+    #         for d in range(int(max_distance)):
+    #             x, y = get_xy_coords(left_angle, d)
+    #             if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
+    #                 map_array[int(y), int(x)] = .5 *d / max_distance
 
-        if right_angle in ANGLES_TO_SCAN and right_angle not in found_angles:
-            for d in range(int(max_distance)):
-                x, y = get_xy_coords(right_angle, d)
-                if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
-                    map_array[int(y), int(x)] = .5 *d / max_distance
+    #     if right_angle in ANGLES_TO_SCAN and right_angle not in found_angles:
+    #         for d in range(int(max_distance)):
+    #             x, y = get_xy_coords(right_angle, d)
+    #             if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
+    #                 map_array[int(y), int(x)] = .5 *d / max_distance
 
 
     # Connect nearby points
@@ -464,7 +464,10 @@ def main():
             print("Goal reached!")
             break
 
-
+        if detect.seePerson:
+            print("Person detected!")
+            while detect.seePerson:
+                time.sleep(.1)
 
         travel_steps = 1  # ensure we move at least one step
         current_path_index += 1
