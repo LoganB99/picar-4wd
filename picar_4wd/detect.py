@@ -28,6 +28,8 @@ class Detect:
         self.seeStopSign = False  # Initialize the seeStopSign boolean
         self.seePerson = False
         self.person_missing_frames = 0  # Counter for frames without seeing a person
+        self.person_timeout = 2.0
+        self.last_person = None
 
     def initialize_camera(self) -> Picamera2:
         picam2 = Picamera2()
@@ -54,11 +56,11 @@ class Detect:
         # Check if a person is detected
         if any(detection.categories[0].category_name == 'person' for detection in detection_result.detections):
             self.seePerson = True
+            self.last_person = time.time()
             self.person_missing_frames = 0  # Reset the counter if a person is seen
         else:
-            self.person_missing_frames += 1
-            if self.person_missing_frames >= 3:
-                self.seePerson = False  # Set to False only if missing for 10 frames
+            if self.last_person and (time.time() - self.last_person) > self.person_timeout:
+                self.seePerson = False  # Set to False only if missing for 2 seconds
 
         return detection_result
 

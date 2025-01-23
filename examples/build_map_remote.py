@@ -26,7 +26,7 @@ TURN_POWER = 50  # Set turn POWER to 50
 SCAN_REF = 25
 GRAYSCALE_REF = 400
 FORWARD_SCAN_RANGE = slice(3,7)  # Indices for forward-facing sensors
-TURN_SLEEP = .36
+TURN_SLEEP = .34
 
 NEED_TO_RESCAN = False
 
@@ -89,10 +89,18 @@ def turn_and_move(cardinal_direction, distance):
             duration = time.time() - start_time
             fc.stop()
             print("stop sign detected")
-            time.sleep(2)
-            pause_stop_sign = 10
+            fc.turn_left(10)
+            time.sleep(.1)
+            fc.turn_right(10)
+            time.sleep(.2)
+            fc.turn_left(10)
+            time.sleep(.1)
+            fc.stop()
+            time.sleep(1)
+            pause_stop_sign = 20
             break
         if detect.seePerson:
+            print("person detected during move")
             duration = time.time() - start_time
             fc.stop()
             while detect.seePerson:
@@ -323,7 +331,7 @@ def scan_data_to_map():
             
             # Get obstacle point coordinates once
             x, y = get_xy_coords(angle, distance)
-            radius = max(5, min(10, int(distance / 2)))
+            radius = max(5, min(15, int(distance/2)))
             for i in range(max(0, int(x) - radius), min(MAP_WIDTH, int(x) + radius)):
                 for j in range(max(0, int(y) - radius), min(MAP_HEIGHT, int(y) + radius)):
                     if (i - x)**2 + (j - y)**2 <= radius**2:
@@ -391,9 +399,9 @@ def send_path_to_server(path):
 def main():
     global detect, car_x, car_y, NEED_TO_RESCAN, map_array, pause_stop_sign
     detection_queue = queue.Queue()
-    detect = fc.Detect(detection_queue=detection_queue, enable_edgetpu=False, num_threads = 2, enable_preview=False)
+    detect = fc.Detect(detection_queue=detection_queue, enable_edgetpu=False, num_threads = 4, enable_preview=False)
     detect.start()
-    time.sleep(1)
+    time.sleep(2)
     # mostly happy with obstacles, need slight improvement on people detection
     # then ready to record
     # print("Starting autonomous navigation...")
@@ -471,6 +479,7 @@ def main():
         if detect.seePerson:
             print("Person detected!")
             while detect.seePerson:
+                print("Person detected!")
                 time.sleep(.1)
             NEED_TO_RESCAN = True
 
